@@ -1,65 +1,58 @@
 # RateFilm
 
-Website katalog film sederhana dengan data dari TMDB. Bisa mencari film, memfilter, menyimpan watchlist, serta memberi rating dan review pribadi.
-
-Dibuat dengan HTML, CSS, dan JavaScript murni — tanpa build tools dan tanpa backend.
+Website katalog film sederhana dengan data dari TMDB. Pengunjung bisa mencari film, memfilter katalog, menyimpan watchlist, serta memberi rating dan review pribadi tanpa login.
 
 ## Fitur
 
 - Katalog film populer dari TMDB
-- Pencarian judul (debounced)
-- Filter genre dan tahun, urutkan berdasarkan popularitas, rating, atau rilis terbaru
-- Halaman detail film: sinopsis, genre, durasi, skor TMDB
+- Pencarian judul, filter genre dan tahun, serta pengurutan film
+- Halaman detail film: sinopsis, genre, durasi, dan skor TMDB
 - Rating 1–10 dengan review singkat
-- Watchlist
-- Halaman "Rating kamu" dengan rata-rata rating
+- Watchlist pribadi
 - Tema gelap responsif, modal detail, toast, dan skeleton loading
 
-## Menjalankan
+## Menyiapkan TMDB di Vercel
 
-1. Daftar API key gratis di [themoviedb.org/settings/api](https://www.themoviedb.org/settings/api).
-2. Buka `index.html` di browser, lalu tempel **API Key (v3 auth)** pada layar awal. Read Access Token (v4) juga didukung.
-3. Selesai.
+Pengunjung tidak perlu membuat akun TMDB atau memasukkan API key. Atur key satu kali di server:
 
-Cara lain: isi `js/config.js`:
+1. Buat **API Key (v3 auth)** di [pengaturan API TMDB](https://www.themoviedb.org/settings/api).
+2. Di Vercel, buka **Project Settings → Environment Variables** dan tambahkan `TMDB_API_KEY` dengan nilai API key tersebut.
+3. Pilih environment yang digunakan (**Production**, dan **Preview/Development** bila diperlukan), lalu deploy ulang.
 
-```js
-window.RATEFILM_CONFIG = {
-  tmdbApiKey: 'API_KEY_KAMU'
-};
-```
+Function di `api/tmdb.js` menggunakan key itu untuk mengambil data TMDB. Key tidak dikirim ke browser dan jangan dimasukkan ke file frontend atau Git.
 
-Key di `js/config.js` dipakai untuk semua pengunjung. Key yang ditempel lewat layar pengaturan hanya tersimpan di browser itu dan menimpa key dari config.
+## Menjalankan lokal
 
-Disarankan menjalankan lewat server lokal agar perilakunya sama seperti saat di-hosting:
+Vercel CLI diperlukan agar function `/api/tmdb` tersedia saat development:
 
 ```bash
-python -m http.server 8080
-# atau
-npx serve .
+npm install --global vercel
+vercel login
+vercel link
+vercel env pull .env.local
+vercel dev
 ```
 
-Lalu buka `http://localhost:8080`.
+Pastikan `TMDB_API_KEY` tersedia untuk environment **Development**. File `.env.local` dan konfigurasi lokal Vercel diabaikan oleh Git.
 
 ## Struktur
 
 ```
 index.html      Markup utama
 css/styles.css  Seluruh styling
-js/config.js    Konfigurasi API key (opsional)
-js/app.js       Logika TMDB, pencarian, filter, rating, watchlist
+js/app.js       Logika katalog, pencarian, filter, rating, dan watchlist
+api/tmdb.js     Proxy server-side ke TMDB
 ```
 
 ## Penyimpanan data & privasi
 
-Rating, review, watchlist, dan API key disimpan di `localStorage` browser masing-masing pengunjung.
+Rating, review, dan watchlist disimpan di `localStorage` browser masing-masing pengunjung.
 
-- Data **tidak dibagikan** ke pengunjung atau perangkat lain.
-- Data **tidak tersinkron** antar browser/perangkat.
+- Data tidak dikirim atau dibagikan ke pengunjung lain.
+- Data tidak tersinkron antarbrowser atau perangkat.
+- Orang yang memakai profil browser yang sama akan melihat data lokal yang sama.
 - Menghapus data situs di browser akan menghapus rating dan watchlist.
-- Karena tidak ada backend, tidak ada akun pengguna. Login/akun sungguhan memerlukan server dan database.
-
-Catatan keamanan: pada situs statis, API key TMDB dapat dilihat siapa pun yang membuka DevTools. Untuk situs publik berskala besar, gunakan backend proxy agar key tidak terekspos.
+- Tidak ada login atau akun pengguna.
 
 ## Atribusi
 

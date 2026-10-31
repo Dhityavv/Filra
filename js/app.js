@@ -1,11 +1,9 @@
 (() => {
   'use strict';
 
-  const TMDB_BASE = 'https://api.themoviedb.org/3';
   const IMAGE_BASE = 'https://image.tmdb.org/t/p';
   const LANGUAGE = 'id-ID';
   const KEYS = {
-    apiKey: 'ratefilm.apiKey.v1',
     ratings: 'ratefilm.ratings.v1',
     watchlist: 'ratefilm.watchlist.v1',
   };
@@ -85,30 +83,6 @@
     }
   }
 
-  function storeGet(key) {
-    try {
-      return localStorage.getItem(key);
-    } catch {
-      return null;
-    }
-  }
-
-  function storeSet(key, value) {
-    try {
-      localStorage.setItem(key, value);
-      return true;
-    } catch {
-      return false;
-    }
-  }
-
-  function getApiKey() {
-    const stored = (storeGet(KEYS.apiKey) || '').trim();
-    if (stored) return stored;
-    const configured = String((window.RATEFILM_CONFIG && window.RATEFILM_CONFIG.tmdbApiKey) || '').trim();
-    return /^PASTE|^ISI|YOUR_API_KEY/i.test(configured) ? '' : configured;
-  }
-
   function img(path, size = 'w500') {
     if (!path) return '';
     return /^https?:\/\//i.test(path) ? path : `${IMAGE_BASE}/${size}${path}`;
@@ -176,11 +150,9 @@
 
   // -------------------------------------------------------------------- API
 
-  async function api(path, params = {}, keyOverride) {
-    const key = String(keyOverride ?? getApiKey()).trim();
-    if (!key) throw new ApiError('API key TMDB belum diatur.', 0);
-
-    const url = new URL(TMDB_BASE + path);
+  async function api(path, params = {}) {
+    const url = new URL('/api/tmdb', window.location.origin);
+    url.searchParams.set('endpoint', path);
     url.searchParams.set('language', LANGUAGE);
     Object.entries(params).forEach(([name, value]) => {
       if (value !== undefined && value !== null && value !== '') {
@@ -188,18 +160,15 @@
       }
     });
 
-    const headers = { accept: 'application/json' };
-    if (key.startsWith('eyJ')) {
-      headers.Authorization = `Bearer ${key}`;
-    } else {
-      url.searchParams.set('api_key', key);
-    }
-
     const controller = new AbortController();
     const timer = window.setTimeout(() => controller.abort(), 15000);
 
     try {
-      const response = await fetch(url.toString(), { headers, signal: controller.signal });
+      const response = await fetch(url.toString(), {
+        headers: { accept: 'application/json' },
+        signal: controller.signal,
+      });
+      const data = await response.json();
       if (response.status === 401) {
         throw new ApiError('API key TMDB tidak valid atau sudah dicabut.', 401);
       }
@@ -207,9 +176,12 @@
         throw new ApiError('Batas permintaan TMDB tercapai. Coba lagi beberapa saat.', 429);
       }
       if (!response.ok) {
-        throw new ApiError(`TMDB menolak permintaan (${response.status}).`, response.status);
+        throw new ApiError(
+          data.error || data.status_message || `Permintaan TMDB gagal (${response.status}).`,
+          response.status,
+        );
       }
-      return await response.json();
+      return data;
     } catch (error) {
       if (error instanceof ApiError) throw error;
       if (error.name === 'AbortError') {
@@ -567,14 +539,13 @@
 
   // ------------------------------------------------------------------ modal
 
-  function openModal(html, focusSelector) {
+  function openModal(html) {
     if (el.modal.hidden) lastFocused = document.activeElement;
     el.modalBody.innerHTML = html;
     el.modal.hidden = false;
     document.body.classList.add('is-locked');
     requestAnimationFrame(() => el.modal.classList.add('is-open'));
-    const target = focusSelector ? $(focusSelector, el.modalBody) : el.modalClose;
-    if (target) target.focus({ preventScroll: true });
+    el.modalClose.focus({ preventScroll: true });
   }
 
   function closeModal() {
@@ -736,63 +707,6 @@
     $('#detailSave', el.modalBody).addEventListener('click', () => toggleWatchlist(movie));
   }
 
-  // --------------------------------------------------------------- settings
-
-  function openSettings() {
-    const key = getApiKey();
-    openModal(`<div class="settings">
-      <p class="eyebrow">Pengaturan</p>
-      <h2 id="modalTitle">API key TMDB</h2>
-      <p class="settings__lead">RateFilm mengambil data film langsung dari TMDB memakai API key kamu.</p>
-      <form class="form" id="settingsForm">
-        <label for="settingsKey">API Key (v3) atau Read Access Token (v4)</label>
-        <input id="settingsKey" type="text" value="${esc(key)}" autocomplete="off" spellcheck="false">
-        <p class="form__error" id="settingsError" role="alert"></p>
-        <div class="form__actions">
-          <button class="btn btn--primary" id="settingsSubmit" type="submit">Simpan &amp; muat ulang</button>
-          <a class="btn btn--ghost" href="https://www.themoviedb.org/settings/api" target="_blank" rel="noreferrer">Buka TMDB</a>
-        </div>
-      </form>
-      <p class="settings__note">${icon('lock')} API key, rating, dan watchlist disimpan di browser ini saja. Pengunjung lain tidak bisa melihat datamu.</p>
-    </div>`, '#settingsKey');
-
-    $('#settingsForm', el.modalBody).addEventListener('submit', (event) => {
-      event.preventDefault();
-      saveApiKey(
-        $('#settingsKey', el.modalBody).value,
-        $('#settingsError', el.modalBody),
-        $('#settingsSubmit', el.modalBody),
-      );
-    });
-  }
-
-  async function saveApiKey(rawKey, errorEl, submitBtn) {
-    const key = rawKey.trim();
-    errorEl.textContent = '';
-    if (!key) {
-      errorEl.textContent = 'API key tidak boleh kosong.';
-      return;
-    }
-
-    const label = submitBtn.textContent;
-    submitBtn.disabled = true;
-    submitBtn.textContent = 'Memeriksa...';
-
-    try {
-      await api('/configuration', {}, key);
-      if (!storeSet(KEYS.apiKey, key)) {
-        errorEl.textContent = 'Browser menolak menyimpan API key. Coba nonaktifkan mode privat.';
-        return;
-      }
-      window.location.reload();
-    } catch (error) {
-      errorEl.textContent = error.message;
-    } finally {
-      submitBtn.disabled = false;
-      submitBtn.textContent = label;
-    }
-  }
-
   // ------------------------------------------------------------------ boot
 
   function buildYearOptions() {
@@ -816,11 +730,6 @@
   }
 
   function initApp() {
-    if (!getApiKey()) {
-      showSetup();
-      return;
-    }
-    el.setupView.hidden = true;
     el.appView.hidden = false;
     updateBadges();
     loadGenres();
@@ -828,12 +737,6 @@
     loadMovies();
     if (state.view === 'watchlist') renderWatchlist();
     if (state.view === 'ratings') renderRatings();
-  }
-
-  function showSetup() {
-    el.appView.hidden = true;
-    el.setupView.hidden = false;
-    window.setTimeout(() => el.setupKey.focus({ preventScroll: true }), 50);
   }
 
   function wireEvents() {
@@ -912,8 +815,6 @@
     });
 
     el.retryBtn.addEventListener('click', () => loadMovies());
-    el.errorSettingsBtn.addEventListener('click', openSettings);
-    el.settingsBtn.addEventListener('click', openSettings);
 
     el.heroDetail.addEventListener('click', () => {
       if (heroMovie) openDetail(heroMovie.id);
@@ -958,19 +859,10 @@
       if (event.key === 'Escape' && !el.modal.hidden) closeModal();
     });
 
-    el.setupForm.addEventListener('submit', (event) => {
-      event.preventDefault();
-      saveApiKey(el.setupKey.value, el.setupError, el.setupSubmit);
-    });
   }
 
   function boot() {
     Object.assign(el, {
-      setupView: $('#setupView'),
-      setupForm: $('#setupForm'),
-      setupKey: $('#setupKey'),
-      setupSubmit: $('#setupSubmit'),
-      setupError: $('#setupError'),
       appView: $('#appView'),
       hero: $('#hero'),
       heroImg: $('#heroImg'),
@@ -995,7 +887,6 @@
       error: $('#exploreError'),
       errorText: $('#errorText'),
       retryBtn: $('#retryBtn'),
-      errorSettingsBtn: $('#errorSettingsBtn'),
       loadMoreWrap: $('#loadMoreWrap'),
       loadMoreBtn: $('#loadMoreBtn'),
       watchlistView: $('#watchlistView'),
@@ -1012,7 +903,6 @@
       tabs: $('.tabs'),
       searchInput: $('#searchInput'),
       searchClear: $('#searchClear'),
-      settingsBtn: $('#settingsBtn'),
       brandLink: $('#brandLink'),
       modal: $('#modal'),
       modalBody: $('#modalBody'),
@@ -1023,12 +913,7 @@
     buildYearOptions();
     wireEvents();
     updateBadges();
-
-    if (getApiKey()) {
-      initApp();
-    } else {
-      showSetup();
-    }
+    initApp();
   }
 
   boot();
