@@ -37,6 +37,10 @@
   let heroMovie = null;
   let ratings = readJSON(KEYS.ratings, {});
   let watchlist = readJSON(KEYS.watchlist, {});
+  let accountUserId = null;
+  let accountReady = false;
+  let pendingIdentity = null;
+  let identityRequestId = 0;
   let theme = readJSON(KEYS.theme, 'dark');
   let lastFocused = null;
   let modalRequest = 0;
@@ -84,6 +88,83 @@
       showToast('Gagal menyimpan ke browser. Penyimpanan mungkin penuh.');
       return false;
     }
+  }
+
+  async function persistMovieCollection(collection, method, movie, entry, nextValues) {
+    if (!accountUserId) {
+      return writeJSON(KEYS[collection], nextValues);
+    }
+
+    const url = `/api/me/${collection}${method === 'DELETE' ? `?movieId=${movie.id}` : ''}`;
+    const response = await fetch(url, {
+      method,
+      headers: method === 'PUT' ? { 'content-type': 'application/json' } : undefined,
+      body: method === 'PUT'
+        ? JSON.stringify({
+            movieId: movie.id,
+            movie: snapshot(movie),
+            ...(collection === 'ratings'
+              ? { score: entry.score, review: entry.review }
+              : {}),
+          })
+        : undefined,
+    });
+    const result = await response.json();
+    if (!response.ok) throw new Error(result.error || 'Perubahan gagal disimpan.');
+    return true;
+  }
+
+  async function syncAccountData(userId) {
+    if (pendingIdentity?.userId === userId) return pendingIdentity.promise;
+    if (accountReady && accountUserId === userId) return;
+
+    accountReady = false;
+    el.appView.hidden = true;
+    const requestId = ++identityRequestId;
+    const promise = Promise.resolve().then(async () => {
+      accountUserId = userId;
+      if (userId) {
+        try {
+          const response = await fetch('/api/me/data', { cache: 'no-store' });
+          const data = await response.json();
+          if (!response.ok) throw new Error(data.error || 'Data akun gagal dimuat.');
+          if (requestId !== identityRequestId) return;
+          ratings = Object.fromEntries(data.ratings.map((item) => [
+            item.movie_id,
+            {
+              ...item.movie,
+              score: item.score,
+              review: item.review,
+              updatedAt: new Date(item.updated_at).getTime(),
+            },
+          ]));
+          watchlist = Object.fromEntries(data.watchlist.map((item) => [
+            item.movie_id,
+            { ...item.movie, addedAt: new Date(item.added_at).getTime() },
+          ]));
+        } catch (error) {
+          if (requestId !== identityRequestId) return;
+          ratings = {};
+          watchlist = {};
+          showToast(error.message);
+        }
+      } else {
+        ratings = readJSON(KEYS.ratings, {});
+        watchlist = readJSON(KEYS.watchlist, {});
+      }
+
+      if (requestId !== identityRequestId) return;
+      accountReady = true;
+      pendingIdentity = null;
+      el.appView.hidden = false;
+      updateBadges();
+      renderWatchlist();
+      renderRatings();
+      Object.keys(ratings).forEach(updateCardRating);
+    });
+
+    pendingIdentity = { userId, promise };
+    return promise;
   }
 
   function applyTheme(nextTheme) {
@@ -519,17 +600,36 @@
     });
   }
 
-  function toggleWatchlist(movie) {
+  async function toggleWatchlist(movie) {
     if (!movie) return;
-    if (watchlist[movie.id]) {
-      delete watchlist[movie.id];
-      writeJSON(KEYS.watchlist, watchlist);
-      showToast(`“${movie.title}” dihapus dari watchlist.`);
+    const removing = Boolean(watchlist[movie.id]);
+    const nextWatchlist = { ...watchlist };
+    const entry = { ...snapshot(movie), addedAt: Date.now() };
+    if (removing) {
+      delete nextWatchlist[movie.id];
     } else {
-      watchlist[movie.id] = { ...snapshot(movie), addedAt: Date.now() };
-      writeJSON(KEYS.watchlist, watchlist);
-      showToast(`“${movie.title}” ditambahkan ke watchlist.`);
+      nextWatchlist[movie.id] = entry;
     }
+
+    const owner = accountUserId;
+    try {
+      const saved = await persistMovieCollection(
+        'watchlist',
+        removing ? 'DELETE' : 'PUT',
+        movie,
+        entry,
+        nextWatchlist,
+      );
+      if (!saved || owner !== accountUserId) return;
+    } catch (error) {
+      showToast(error.message);
+      return;
+    }
+
+    watchlist = nextWatchlist;
+    showToast(removing
+      ? `“${movie.title}” dihapus dari watchlist.`
+      : `“${movie.title}” ditambahkan ke watchlist.`);
     updateBadges();
     updateSaveButtons(movie.id);
     if (state.view === 'watchlist') renderWatchlist();
@@ -711,36 +811,50 @@
       if (!starsWrap.contains(event.relatedTarget)) paint(draft);
     });
 
-    form.addEventListener('submit', (event) => {
+    form.addEventListener('submit', async (event) => {
       event.preventDefault();
       if (!draft) {
         showToast('Pilih bintang dulu untuk memberi rating.');
         return;
       }
-      ratings[movie.id] = {
+      const entry = {
         ...snapshot(movie),
         score: draft,
         review: $('#reviewInput', form).value.trim().slice(0, 500),
         updatedAt: Date.now(),
       };
-      if (writeJSON(KEYS.ratings, ratings)) {
+      const nextRatings = { ...ratings, [movie.id]: entry };
+      const owner = accountUserId;
+      try {
+        const saved = await persistMovieCollection('ratings', 'PUT', movie, entry, nextRatings);
+        if (!saved || owner !== accountUserId) return;
+        ratings = nextRatings;
         updateBadges();
         updateCardRating(movie.id);
         renderDetail(movie);
         showToast('Rating kamu tersimpan.');
+      } catch (error) {
+        showToast(error.message);
       }
     });
 
     const deleteButton = $('#deleteRating', form);
     if (deleteButton) {
-      deleteButton.addEventListener('click', () => {
+      deleteButton.addEventListener('click', async () => {
         if (!window.confirm(`Hapus rating untuk “${movie.title}”?`)) return;
-        delete ratings[movie.id];
-        if (writeJSON(KEYS.ratings, ratings)) {
+        const nextRatings = { ...ratings };
+        delete nextRatings[movie.id];
+        const owner = accountUserId;
+        try {
+          const saved = await persistMovieCollection('ratings', 'DELETE', movie, null, nextRatings);
+          if (!saved || owner !== accountUserId) return;
+          ratings = nextRatings;
           updateBadges();
           updateCardRating(movie.id);
           renderDetail(movie);
           showToast('Rating dihapus.');
+        } catch (error) {
+          showToast(error.message);
         }
       });
     }
@@ -771,7 +885,6 @@
   }
 
   function initApp() {
-    el.appView.hidden = false;
     updateBadges();
     loadGenres();
     loadHero();
@@ -875,19 +988,26 @@
     el.grid.addEventListener('click', handleGridClick);
     el.watchlistGrid.addEventListener('click', handleGridClick);
 
-    el.ratingsList.addEventListener('click', (event) => {
+    el.ratingsList.addEventListener('click', async (event) => {
       const deleteButton = event.target.closest('[data-delete-rating]');
       if (deleteButton) {
         const id = Number(deleteButton.dataset.deleteRating);
         const movie = ratings[id];
         if (!movie) return;
         if (!window.confirm(`Hapus rating untuk “${movie.title}”?`)) return;
-        delete ratings[id];
-        if (writeJSON(KEYS.ratings, ratings)) {
+        const nextRatings = { ...ratings };
+        delete nextRatings[id];
+        const owner = accountUserId;
+        try {
+          const saved = await persistMovieCollection('ratings', 'DELETE', movie, null, nextRatings);
+          if (!saved || owner !== accountUserId) return;
+          ratings = nextRatings;
           updateBadges();
           updateCardRating(id);
           renderRatings();
           showToast('Rating dihapus.');
+        } catch (error) {
+          showToast(error.message);
         }
         return;
       }
@@ -963,6 +1083,12 @@
     applyTheme(theme);
     buildYearOptions();
     wireEvents();
+    window.addEventListener('filra:auth', (event) => {
+      void syncAccountData(event.detail?.userId || null);
+    });
+    if (window.filraAuthState?.isLoaded) {
+      void syncAccountData(window.filraAuthState.userId || null);
+    }
     if ('IntersectionObserver' in window) {
       const loadMoreObserver = new IntersectionObserver((entries) => {
         if (entries.some((entry) => entry.isIntersecting) && state.view === 'explore') {

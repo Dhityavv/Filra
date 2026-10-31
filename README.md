@@ -1,62 +1,69 @@
 # Filra - Film Rating
 
-Filra (Film Rating) adalah website katalog film dengan data dari TMDB. Pengunjung bisa mencari film, memfilter katalog, menyimpan watchlist, serta memberi rating dan review pribadi tanpa login.
+Filra is a responsive movie discovery and rating app built with Next.js, TMDB, Clerk, and Supabase. Users can browse films without an account; signing in adds a profile, synced ratings/watchlist, and friend features.
 
-## Fitur
+## Features
 
-- Katalog film populer dari TMDB
-- Pencarian judul, filter genre dan tahun, serta pengurutan film
-- Halaman detail film: sinopsis, genre, durasi, dan skor TMDB
-- Rating 1–10 dengan review singkat
-- Watchlist pribadi
-- Tema gelap dan terang yang bisa diganti, modal detail, toast, dan skeleton loading
+- Search, genre/year filters, sorting, and automatic movie pagination
+- Movie details, Indonesian synopsis fallback, ratings, and short reviews
+- Clerk sign-in with Google and email/password
+- Custom public profile: username, display name, bio, and website link
+- Search for users, send/accept friend requests, and view public profiles
+- Ratings and reviews are public; each user's watchlist remains private
+- Signed-in ratings and watchlists sync by account; guest data stays in that browser
+- Dark and comfortable light themes
 
-## Menyiapkan TMDB di Vercel
+## Configure services
 
-Pengunjung tidak perlu membuat akun TMDB atau memasukkan API key. Atur key satu kali di server:
+### 1. Clerk
 
-1. Buat **API Key (v3 auth)** di [pengaturan API TMDB](https://www.themoviedb.org/settings/api).
-2. Di Vercel, buka **Project Settings → Environment Variables** dan tambahkan `TMDB_API_KEY` dengan nilai API key tersebut.
-3. Pilih environment yang digunakan (**Production**, dan **Preview/Development** bila diperlukan), lalu deploy ulang.
+Create a Clerk application and enable Google and email/password sign-in. Add these environment variables to local development and to Vercel:
 
-Function di `api/tmdb.js` menggunakan key itu untuk mengambil data TMDB. Key tidak dikirim ke browser dan jangan dimasukkan ke file frontend atau Git.
+- `NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY`
+- `CLERK_SECRET_KEY`
 
-Sinopsis ditampilkan dalam bahasa Indonesia bila tersedia. Jika kosong atau terlalu pendek, Filra memakai sinopsis bahasa Inggris dari TMDB bila tersedia.
+In the Clerk dashboard, allow your local and production app domains. Configure Google OAuth credentials there if Clerk requests them.
 
-## Menjalankan lokal
+### 2. Supabase
 
-Vercel CLI diperlukan agar function `/api/tmdb` tersedia saat development:
+Create a Supabase project and run [`supabase/schema.sql`](./supabase/schema.sql) in its SQL Editor. Add these server environment variables:
+
+- `SUPABASE_URL`
+- `SUPABASE_SERVICE_ROLE_KEY`
+
+The service-role key must remain server-side and must never be exposed in browser code. Filra's authenticated Next.js API routes enforce account ownership; the database tables also have row-level security enabled.
+
+### 3. TMDB
+
+Create a TMDB API key and configure it as `TMDB_API_KEY` on Vercel (and locally). The key is used only by the server-side `/api/tmdb` route.
+
+### 4. Local development
+
+Copy `.env.example` to `.env.local`, fill in the values from Clerk, Supabase, and TMDB, then run:
 
 ```bash
-npm install --global vercel
-vercel login
-vercel link
-vercel env pull .env.local
-vercel dev
+npm install
+npm run dev
 ```
 
-Pastikan `TMDB_API_KEY` tersedia untuk environment **Development**. File `.env.local` dan konfigurasi lokal Vercel diabaikan oleh Git.
+For a production build:
 
-## Struktur
-
-```
-index.html      Markup utama
-css/styles.css  Seluruh styling
-js/app.js       Logika katalog, pencarian, filter, rating, dan watchlist
-api/tmdb.js     Proxy server-side ke TMDB
+```bash
+npm run build
 ```
 
-## Penyimpanan data & privasi
+Set the same environment variables in the Vercel project before deploying. Do not commit `.env.local` or any secret keys.
 
-Rating, review, dan watchlist disimpan di `localStorage` browser masing-masing pengunjung.
+## Accounts and privacy
 
-- Data tidak dikirim atau dibagikan ke pengunjung lain.
-- Data tidak tersinkron antarbrowser atau perangkat.
-- Orang yang memakai profil browser yang sama akan melihat data lokal yang sama.
-- Pilihan tema juga tersimpan lokal di browser.
-- Menghapus data situs di browser akan menghapus rating dan watchlist.
-- Tidak ada login atau akun pengguna.
+- Public profiles show the username, display name, bio, optional website, ratings, and reviews.
+- Watchlists are private to the signed-in account.
+- Friend requests require the recipient's approval.
+- Signed-in account data is stored in Supabase and isolated by Clerk user ID.
+- Visitors who are not signed in continue to use browser-local ratings and watchlists.
+- Existing browser-local data is not automatically imported into a new account.
+- Theme preference remains local to the current browser.
 
-## Atribusi
+## Data attribution
 
-Data film dan gambar disediakan oleh [TMDB](https://www.themoviedb.org/). Produk ini tidak didukung atau disertifikasi oleh TMDB.
+Movie data and images are provided by [TMDB](https://www.themoviedb.org/). Filra is not endorsed or certified by TMDB.

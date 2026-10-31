@@ -1,0 +1,152 @@
+.legacy-root {
+  display: contents;
+}
+
+.community-page {
+  width: min(100% - 48px, 900px);
+  margin: 28px auto 64px;
+}
+
+.community-nav {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 12px max(24px, calc((100% - 900px) / 2));
+  border-bottom: 1px solid var(--line);
+  background: var(--bg-elev);
+}
+
+.community-nav nav {
+  display: flex;
+  gap: 16px;
+  font-size: 13px;
+  font-weight: 650;
+}
+
+.community-card {
+  margin-top: 20px;
+  padding: 22px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-lg);
+  background: var(--bg-elev);
+}
+
+.community-form {
+  display: flex;
+  gap: 10px;
+}
+
+.community-form input,
+.profile-form input,
+.profile-form textarea {
+  width: 100%;
+  min-width: 0;
+  padding: 11px 13px;
+  border: 1px solid var(--line-strong);
+  border-radius: 10px;
+  background: var(--bg-elev-2);
+}
+
+.profile-form {
+  display: grid;
+  gap: 14px;
+}
+
+.profile-form label {
+  display: grid;
+  gap: 6px;
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.community-list {
+  display: grid;
+  gap: 10px;
+  margin-top: 14px;
+}
+
+.community-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.community-row__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.community-row__name {
+  color: var(--text);
+  font-weight: 700;
+}
+
+.community-muted {
+  color: var(--text-dim);
+  font-size: 13px;
+}
+
+.community-error {
+  margin-top: 12px;
+  color: var(--danger);
+}
+
+.profile-link {
+  overflow-wrap: anywhere;
+}
+
+.account-controls {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+#filraAccountMount {
+  display: contents;
+}
+
+.account-controls .btn {
+  white-space: nowrap;
+}
+
+.account-setup-note {
+  color: var(--text-dim);
+  font-size: 12px;
+}
+
+@media (max-width: 720px) {
+  .community-page {
+    width: min(100% - 32px, 900px);
+  }
+
+  .community-nav {
+    padding-inline: 16px;
+  }
+
+  @media (min-width: 721px) and (max-width: 900px) {
+    .account-controls {
+      order: 5;
+    }
+  }
+
+  .community-form,
+  .community-row {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .account-controls {
+    order: 5;
+    justify-content: flex-end;
+  }
+}
