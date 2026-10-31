@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>RateFilm — Temukan, tonton, beri rating</title>
+  <meta name="description" content="Jelajahi film populer, cari judul favorit, simpan watchlist, dan beri rating pribadi. Data rating tersimpan di browser kamu.">
+  <meta name="color-scheme" content="dark">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=Manrope:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="css/styles.css">
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' rx='6' fill='%230a0a0e'/%3E%3Cpath d='M12 4l2.3 4.7 5.2.8-3.8 3.6.9 5.1-4.6-2.4-4.6 2.4.9-5.1L4.5 9.5l5.2-.8z' fill='%23f0b64b'/%3E%3C/svg%3E">
+</head>
+<body>
+  <a class="skip-link" href="#main">Lewati ke konten</a>
+
+  <svg class="sprite" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+    <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5-5.8-3-5.8 3 1.1-6.5L2.6 9.4l6.5-.9z"/></symbol>
+    <symbol id="i-search" viewBox="0 0 24 24"><path d="M11 4a7 7 0 015.6 11.2l4.1 4.1-1.4 1.4-4.1-4.1A7 7 0 1111 4zm0 2a5 5 0 100 10 5 5 0 000-10z"/></symbol>
+    <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 011 1v17l-7-4.2L5 21V4a1 1 0 011-1z"/></symbol>
+    <symbol id="i-gear" viewBox="0 0 24 24"><path d="M19.4 13a7.6 7.6 0 000-2l2-1.6-2-3.4-2.4 1a7.6 7.6 0 00-1.7-1L15 3h-4l-.3 2.6a7.6 7.6 0 00-1.7 1l-2.4-1-2 3.4L6.6 11a7.6 7.6 0 000 2l-2 1.6 2 3.4 2.4-1c.5.4 1.1.8 1.7 1L11 21h4l.3-2.6c.6-.2 1.2-.6 1.7-1l2.4 1 2-3.4-2-1.6zM13 15.5a3.5 3.5 0 110-7 3.5 3.5 0 010 7z"/></symbol>
+    <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.4 5L5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z"/></symbol>
+    <symbol id="i-trash" viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4l1-2zM6 9h12l-1 12H7L6 9zm3 2v8h2v-8H9zm4 0v8h2v-8h-2z"/></symbol>
+    <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 16.5V20h3.5L18.8 8.7l-3.5-3.5L4 16.5zM20.7 6.8a1 1 0 000-1.4l-2.1-2.1a1 1 0 00-1.4 0l-1.4 1.4 3.5 3.5 1.4-1.4z"/></symbol>
+    <symbol id="i-film" viewBox="0 0 24 24"><path d="M4 3h16a1 1 0 011 1v16a1 1 0 01-1 1H4a1 1 0 01-1-1V4a1 1 0 011-1zm2 2v2h2V5H6zm10 0v2h2V5h-2zM6 17v2h2v-2H6zm10 0v2h2v-2h-2zM10 5v14h4V5h-4z"/></symbol>
+    <symbol id="i-lock" viewBox="0 0 24 24"><path d="M12 2a5 5 0 00-5 5v3H5v12h14V10h-2V7a5 5 0 00-5-5zm0 2a3 3 0 013 3v3H9V7a3 3 0 013-3z"/></symbol>
+    <symbol id="i-check" viewBox="0 0 24 24"><path d="M9.5 17.6l-5.1-5.1 1.4-1.4 3.7 3.7 8.7-8.7 1.4 1.4z"/></symbol>
+    <symbol id="i-info" viewBox="0 0 24 24"><path d="M12 2a10 10 0 100 20 10 10 0 000-20zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></symbol>
+  </svg>
+
+  <header class="site-header">
+    <div class="container site-header__inner">
+      <a class="brand" href="#" id="brandLink" aria-label="RateFilm, kembali ke jelajah">
+        <span class="brand__mark"><svg class="icon" aria-hidden="true"><use href="#i-star"></use></svg></span>
+        <span class="brand__name">Rate<em>Film</em></span>
+      </a>
+
+      <div class="search" role="search">
+        <svg class="icon search__icon" aria-hidden="true"><use href="#i-search"></use></svg>
+        <input class="search__input" id="searchInput" type="search" placeholder="Cari judul film..." aria-label="Cari film" autocomplete="off">
+        <button class="search__clear" id="searchClear" type="button" aria-label="Hapus pencarian" hidden>
+          <svg class="icon" aria-hidden="true"><use href="#i-close"></use></svg>
+        </button>
+      </div>
+
+      <nav class="tabs" aria-label="Tampilan">
+        <button class="tab is-active" type="button" data-view="explore" aria-pressed="true">Jelajahi</button>
+        <button class="tab" type="button" data-view="watchlist" aria-pressed="false">Watchlist <span class="tab__count" data-count="watchlist">0</span></button>
+        <button class="tab" type="button" data-view="ratings" aria-pressed="false">Rating <span class="tab__count" data-count="ratings">0</span></button>
+      </nav>
+
+      <button class="icon-btn settings-btn" id="settingsBtn" type="button" aria-label="Pengaturan API key" title="Pengaturan API key">
+        <svg class="icon" aria-hidden="true"><use href="#i-gear"></use></svg>
+      </button>
+    </div>
+  </header>
+
+  <main class="container" id="main">
+    <section class="setup" id="setupView" hidden>
+      <div class="setup__card">
+        <span class="setup__badge">Langkah awal</span>
+        <h1 class="setup__title">Hubungkan <em>RateFilm</em> ke TMDB</h1>
+        <p class="setup__lead">RateFilm memakai data film dari TMDB. Tempel API key kamu di bawah, lalu mulai menjelajah.</p>
+        <ol class="setup__steps">
+          <li>Buka <a href="https://www.themoviedb.org/settings/api" target="_blank" rel="noreferrer">themoviedb.org/settings/api</a> dan daftar gratis.</li>
+          <li>Salin <strong>API Key (v3 auth)</strong> — Read Access Token (v4) juga bisa.</li>
+          <li>Tempel di kolom bawah, lalu simpan.</li>
+        </ol>
+        <form class="setup__form" id="setupForm">
+          <label for="setupKey">API key TMDB</label>
+          <div class="setup__row">
+            <input id="setupKey" type="text" placeholder="Tempel API key di sini" autocomplete="off" spellcheck="false" required>
+            <button class="btn btn--primary" id="setupSubmit" type="submit">Simpan &amp; mulai</button>
+          </div>
+          <p class="form__error" id="setupError" role="alert"></p>
+        </form>
+        <p class="setup__note">
+          <svg class="icon" aria-hidden="true"><use href="#i-lock"></use></svg>
+          API key disimpan di browser ini. Rating dan watchlist juga tersimpan lokal, tidak dibagikan ke pengunjung lain.
+        </p>
+      </div>
+    </section>
+
+    <div id="appView" hidden>
+      <section class="hero" id="hero" aria-label="Film unggulan" hidden>
+        <div class="hero__media">
+          <img class="hero__img" id="heroImg" alt="" loading="eager" decoding="async">
+        </div>
+        <div class="hero__content">
+          <p class="eyebrow">Sedang populer hari ini</p>
+          <h1 class="hero__title" id="heroTitle"></h1>
+          <div class="hero__meta" id="heroMeta"></div>
+          <p class="hero__overview" id="heroOverview"></p>
+          <div class="hero__actions">
+            <button class="btn btn--primary" id="heroDetail" type="button">Lihat detail</button>
+            <button class="btn btn--ghost" id="heroSave" type="button"></button>
+          </div>
+        </div>
+      </section>
+
+      <section class="view" id="exploreView">
+        <header class="section-head">
+          <div>
+            <p class="eyebrow" id="exploreEyebrow">Jelajahi</p>
+            <h2 class="section-head__title" id="exploreTitle">Katalog film</h2>
+          </div>
+          <p class="result-meta" id="resultMeta"></p>
+        </header>
+
+        <div class="filters" id="filters">
+          <label class="field">
+            <span>Genre</span>
+            <select id="genreSelect"><option value="">Semua genre</option></select>
+          </label>
+          <label class="field">
+            <span>Tahun</span>
+            <select id="yearSelect"><option value="">Semua tahun</option></select>
+          </label>
+          <label class="field">
+            <span>Urutkan</span>
+            <select id="sortSelect">
+              <option value="popularity.desc">Paling populer</option>
+              <option value="vote_average.desc">Rating tertinggi</option>
+              <option value="primary_release_date.desc">Rilis terbaru</option>
+            </select>
+          </label>
+          <button class="btn btn--ghost btn--sm" id="resetFilters" type="button" hidden>Reset filter</button>
+        </div>
+
+        <div class="movie-grid" id="movieGrid" aria-live="polite"></div>
+
+        <div class="empty" id="exploreEmpty" hidden>
+          <svg class="empty__icon" aria-hidden="true"><use href="#i-film"></use></svg>
+          <h3 id="emptyTitle">Film tidak ditemukan</h3>
+          <p id="emptyText">Coba kata kunci lain atau longgarkan filter.</p>
+        </div>
+
+        <div class="error-panel" id="exploreError" hidden>
+          <h3>Data film gagal dimuat</h3>
+          <p id="errorText"></p>
+          <div class="error-panel__actions">
+            <button class="btn btn--primary btn--sm" id="retryBtn" type="button">Coba lagi</button>
+            <button class="btn btn--ghost btn--sm" id="errorSettingsBtn" type="button">Periksa API key</button>
+          </div>
+        </div>
+
+        <div class="load-more" id="loadMoreWrap" hidden>
+          <button class="btn btn--ghost" id="loadMoreBtn" type="button">Muat lebih banyak</button>
+        </div>
+      </section>
+
+      <section class="view" id="watchlistView" hidden>
+        <header class="section-head">
+          <div>
+            <p class="eyebrow">Koleksi pribadi</p>
+            <h2 class="section-head__title">Watchlist kamu</h2>
+          </div>
+        </header>
+        <p class="section-note">Film yang ingin kamu tonton. Tersimpan hanya di browser ini.</p>
+        <div class="movie-grid" id="watchlistGrid"></div>
+        <div class="empty" id="watchlistEmpty" hidden>
+          <svg class="empty__icon" aria-hidden="true"><use href="#i-bookmark"></use></svg>
+          <h3>Watchlist masih kosong</h3>
+          <p>Tekan ikon bookmark pada film untuk menyimpannya ke sini.</p>
+          <button class="btn btn--primary btn--sm" id="watchlistExploreBtn" type="button">Jelajahi film</button>
+        </div>
+      </section>
+
+      <section class="view" id="ratingsView" hidden>
+        <header class="section-head">
+          <div>
+            <p class="eyebrow">Koleksi pribadi</p>
+            <h2 class="section-head__title">Rating kamu</h2>
+          </div>
+        </header>
+        <div class="rating-summary" id="ratingSummary" hidden>
+          <div class="rating-summary__stat"><strong id="ratingAvg">0</strong><span>rata-rata /10</span></div>
+          <span class="rating-summary__divider" aria-hidden="true"></span>
+          <div class="rating-summary__stat"><strong id="ratingTotal">0</strong><span>film dirating</span></div>
+          <p class="rating-summary__note">Hanya terlihat di browser ini.</p>
+        </div>
+        <div class="rating-list" id="ratingsList"></div>
+        <div class="empty" id="ratingsEmpty" hidden>
+          <svg class="empty__icon" aria-hidden="true"><use href="#i-star"></use></svg>
+          <h3>Belum ada rating</h3>
+          <p>Buka detail film, lalu pilih bintang dan simpan rating kamu.</p>
+          <button class="btn btn--primary btn--sm" id="ratingsExploreBtn" type="button">Jelajahi film</button>
+        </div>
+      </section>
+    </div>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p class="site-footer__brand">RateFilm</p>
+      <p class="site-footer__note"><svg class="icon" aria-hidden="true"><use href="#i-lock"></use></svg> Rating, review, dan watchlist tersimpan hanya di browser ini.</p>
+      <p class="site-footer__credit">Data film oleh <a href="https://www.themoviedb.org/" target="_blank" rel="noreferrer">TMDB</a>. Produk ini tidak didukung atau disertifikasi oleh TMDB.</p>
+    </div>
+  </footer>
+
+  <div class="modal" id="modal" hidden>
+    <div class="modal__backdrop" data-close></div>
+    <div class="modal__panel" id="modalPanel" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+      <button class="modal__close" type="button" data-close aria-label="Tutup detail">
+        <svg class="icon" aria-hidden="true"><use href="#i-close"></use></svg>
+      </button>
+      <div class="modal__scroll">
+        <div id="modalBody"></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="toast" id="toast" role="status" aria-live="polite" aria-atomic="true"></div>
+
+  <noscript><p class="noscript">RateFilm membutuhkan JavaScript untuk mengambil data film dari TMDB.</p></noscript>
+
+  <script src="js/config.js"></script>
+  <script src="js/app.js" defer></script>
+</body>
+</html>
