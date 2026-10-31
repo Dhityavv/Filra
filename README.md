@@ -9,7 +9,7 @@ Filra (Film Rating) adalah website katalog film dengan data dari TMDB. Pengunjun
 - Halaman detail film: sinopsis, genre, durasi, dan skor TMDB
 - Rating 1–10 dengan review singkat
 - Watchlist pribadi
-- Tema gelap responsif, modal detail, toast, dan skeleton loading
+- Tema gelap dan terang yang bisa diganti, modal detail, toast, dan skeleton loading
 
 ## Menyiapkan TMDB di Vercel
 
@@ -53,6 +53,7 @@ Rating, review, dan watchlist disimpan di `localStorage` browser masing-masing p
 - Data tidak dikirim atau dibagikan ke pengunjung lain.
 - Data tidak tersinkron antarbrowser atau perangkat.
 - Orang yang memakai profil browser yang sama akan melihat data lokal yang sama.
+- Pilihan tema juga tersimpan lokal di browser.
 - Menghapus data situs di browser akan menghapus rating dan watchlist.
 - Tidak ada login atau akun pengguna.
 
