@@ -6,7 +6,6 @@
   const KEYS = {
     ratings: 'ratefilm.ratings.v1',
     watchlist: 'ratefilm.watchlist.v1',
-    theme: 'filra.theme.v1',
   };
 
   class ApiError extends Error {
@@ -41,7 +40,6 @@
   let accountReady = false;
   let pendingIdentity = null;
   let identityRequestId = 0;
-  let theme = readJSON(KEYS.theme, 'dark');
   let lastFocused = null;
   let modalRequest = 0;
   let toastTimer = 0;
@@ -165,17 +163,6 @@
 
     pendingIdentity = { userId, promise };
     return promise;
-  }
-
-  function applyTheme(nextTheme) {
-    theme = nextTheme === 'light' ? 'light' : 'dark';
-    document.documentElement.dataset.theme = theme;
-    el.colorSchemeMeta.content = theme;
-
-    const nextThemeLabel = theme === 'dark' ? 'Ganti ke tema terang' : 'Ganti ke tema gelap';
-    el.themeToggle.setAttribute('aria-label', nextThemeLabel);
-    el.themeToggle.title = nextThemeLabel;
-    el.themeToggle.setAttribute('aria-pressed', String(theme === 'light'));
   }
 
   function img(path, size = 'w500') {
@@ -972,11 +959,6 @@
       }
     });
 
-    el.themeToggle.addEventListener('click', () => {
-      applyTheme(theme === 'dark' ? 'light' : 'dark');
-      writeJSON(KEYS.theme, theme);
-    });
-
     el.heroDetail.addEventListener('click', () => {
       if (heroMovie) openDetail(heroMovie.id);
     });
@@ -1072,15 +1054,12 @@
       searchInput: $('#searchInput'),
       searchClear: $('#searchClear'),
       brandLink: $('#brandLink'),
-      themeToggle: $('#themeToggle'),
-      colorSchemeMeta: $('meta[name="color-scheme"]'),
       modal: $('#modal'),
       modalBody: $('#modalBody'),
       modalClose: $('.modal__close'),
       toast: $('#toast'),
     });
 
-    applyTheme(theme);
     buildYearOptions();
     wireEvents();
     window.addEventListener('filra:auth', (event) => {

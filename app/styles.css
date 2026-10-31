@@ -28,26 +28,6 @@
   --ease: cubic-bezier(0.2, 0.7, 0.2, 1);
 }
 
-:root[data-theme="light"] {
-  color-scheme: light;
-  --bg: #f5f2f8;
-  --bg-elev: #fff;
-  --bg-elev-2: #eee9f4;
-  --text: #292436;
-  --text-dim: #5e586b;
-  --text-faint: #777184;
-  --gold: #7048bd;
-  --gold-strong: #5e38a8;
-  --gold-soft: rgba(112, 72, 189, 0.1);
-  --gold-line: rgba(112, 72, 189, 0.27);
-  --on-accent: #fff;
-  --line: rgba(48, 37, 67, 0.1);
-  --line-strong: rgba(48, 37, 67, 0.19);
-  --danger: #b42336;
-  --danger-soft: rgba(190, 53, 65, 0.07);
-  --shadow: 0 24px 60px rgba(43, 32, 60, 0.14);
-}
-
 *,
 *::before,
 *::after {
@@ -385,44 +365,6 @@ img {
 .tab.is-active .tab__count {
   background: rgba(179, 154, 255, 0.18);
   color: var(--gold-strong);
-}
-
-.theme-toggle {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: 7px;
-  min-height: 40px;
-  padding: 0 12px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: rgba(255, 255, 255, 0.035);
-  color: var(--text-dim);
-  font-size: 12px;
-  font-weight: 650;
-  white-space: nowrap;
-  transition: color 0.18s, border-color 0.18s, background 0.18s;
-}
-
-.theme-toggle:hover {
-  border-color: var(--gold-line);
-  background: var(--gold-soft);
-  color: var(--gold-strong);
-}
-
-.theme-toggle .icon {
-  width: 17px;
-  height: 17px;
-  color: var(--gold);
-}
-
-.theme-toggle__moon,
-:root[data-theme="light"] .theme-toggle__sun {
-  display: none;
-}
-
-:root[data-theme="light"] .theme-toggle__moon {
-  display: block;
 }
 
 .icon-btn {
@@ -1629,10 +1571,6 @@ img {
     margin-right: auto;
   }
 
-  .theme-toggle {
-    order: 2;
-  }
-
   .search {
     order: 3;
     flex: 1 0 100%;
@@ -1687,10 +1625,6 @@ img {
 
   .brand {
     margin-right: auto;
-  }
-
-  .theme-toggle {
-    order: 2;
   }
 
   .search {
@@ -1773,95 +1707,6 @@ img {
   .modal-message {
     padding: 30px 22px;
   }
-}
-
-:root[data-theme="light"] body::before {
-  background:
-    radial-gradient(900px 520px at 88% -8%, rgba(112, 72, 189, 0.065), transparent 62%),
-    radial-gradient(760px 480px at -5% 8%, rgba(133, 93, 161, 0.045), transparent 58%);
-}
-
-:root[data-theme="light"] .site-header {
-  background: rgba(248, 246, 251, 0.9);
-}
-
-:root[data-theme="light"] .search,
-:root[data-theme="light"] .tabs,
-:root[data-theme="light"] .theme-toggle {
-  background-color: rgba(57, 42, 78, 0.035);
-}
-
-:root[data-theme="light"] .search:focus-within,
-:root[data-theme="light"] .theme-toggle:hover {
-  background-color: rgba(112, 72, 189, 0.07);
-}
-
-:root[data-theme="light"] .tab__count {
-  background: rgba(57, 42, 78, 0.08);
-}
-
-:root[data-theme="light"] .filters,
-:root[data-theme="light"] .rating-row,
-:root[data-theme="light"] .rate-box {
-  background: rgba(57, 42, 78, 0.025);
-}
-
-:root[data-theme="light"] .rating-row:hover {
-  background: rgba(57, 42, 78, 0.05);
-}
-
-:root[data-theme="light"] .poster {
-  background:
-    linear-gradient(160deg, rgba(112, 72, 189, 0.12), rgba(255, 255, 255, 0.35) 55%, rgba(41, 36, 54, 0.08)),
-    var(--bg-elev-2);
-}
-
-:root[data-theme="light"] .poster__fallback {
-  color: rgba(41, 36, 54, 0.35);
-}
-
-:root[data-theme="light"] .star,
-:root[data-theme="light"] .star-bar {
-  color: rgba(55, 45, 70, 0.2);
-}
-
-:root[data-theme="light"] .error-panel p {
-  color: #773a42;
-}
-
-:root[data-theme="light"] .modal__close {
-  color: #fff;
-}
-
-:root[data-theme="light"] .modal__close:hover {
-  color: var(--gold-strong);
-}
-
-:root[data-theme="light"] .detail__hero {
-  background:
-    radial-gradient(520px 260px at 70% 10%, rgba(112, 72, 189, 0.1), transparent 70%),
-    linear-gradient(135deg, #eee9f4, #e6e0ef);
-}
-
-:root[data-theme="light"] .detail__hero::after {
-  background: linear-gradient(0deg, var(--bg-elev) 0%, rgba(255, 255, 255, 0.88) 25%, transparent 78%);
-}
-
-:root[data-theme="light"] .detail__overview {
-  color: var(--text-dim);
-}
-
-:root[data-theme="light"] .chip {
-  background: rgba(57, 42, 78, 0.035);
-}
-
-:root[data-theme="light"] .rate-box textarea {
-  background: #fff;
-}
-
-:root[data-theme="light"] .toast {
-  background: #fff;
-  box-shadow: 0 18px 44px rgba(43, 32, 60, 0.18);
 }
 
 @media (max-width: 560px) {
