@@ -1,6 +1,6 @@
-# RateFilm
+# Filra — Film Rating
 
-Website katalog film sederhana dengan data dari TMDB. Pengunjung bisa mencari film, memfilter katalog, menyimpan watchlist, serta memberi rating dan review pribadi tanpa login.
+Filra (Film Rating) adalah website katalog film dengan data dari TMDB. Pengunjung bisa mencari film, memfilter katalog, menyimpan watchlist, serta memberi rating dan review pribadi tanpa login.
 
 ## Fitur
 
