@@ -1,5 +1,5 @@
 /* ==========================================================================
-   Filra — tema bioskop gelap
+   Filra - tema bioskop gelap
    ========================================================================== */
 
 :root {
@@ -472,7 +472,7 @@ img {
 
 .hero__overview {
   display: -webkit-box;
-  -webkit-line-clamp: 3;
+  -webkit-line-clamp: 5;
   -webkit-box-orient: vertical;
   overflow: hidden;
   max-width: 560px;
@@ -1664,7 +1664,7 @@ img {
   }
 
   .hero__overview {
-    -webkit-line-clamp: 4;
+    -webkit-line-clamp: 6;
   }
 
   .modal {

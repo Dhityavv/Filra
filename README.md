@@ -1,4 +1,4 @@
-# Filra — Film Rating
+# Filra - Film Rating
 
 Filra (Film Rating) adalah website katalog film dengan data dari TMDB. Pengunjung bisa mencari film, memfilter katalog, menyimpan watchlist, serta memberi rating dan review pribadi tanpa login.
 
@@ -20,6 +20,8 @@ Pengunjung tidak perlu membuat akun TMDB atau memasukkan API key. Atur key satu 
 3. Pilih environment yang digunakan (**Production**, dan **Preview/Development** bila diperlukan), lalu deploy ulang.
 
 Function di `api/tmdb.js` menggunakan key itu untuk mengambil data TMDB. Key tidak dikirim ke browser dan jangan dimasukkan ke file frontend atau Git.
+
+Sinopsis ditampilkan dalam bahasa Indonesia bila tersedia. Jika kosong atau terlalu pendek, Filra memakai sinopsis bahasa Inggris dari TMDB bila tersedia.
 
 ## Menjalankan lokal
 

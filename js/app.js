@@ -281,8 +281,17 @@
     try {
       const data = await api('/trending/movie/day');
       const results = Array.isArray(data.results) ? data.results : [];
-      const movie = results.find((item) => item.backdrop_path) || results[0];
+      let movie = results.find((item) => item.backdrop_path) || results[0];
       if (!movie) return;
+
+      if ((movie.overview || '').trim().length < 120) {
+        try {
+          movie = { ...movie, ...await api(`/movie/${movie.id}`) };
+        } catch (error) {
+          console.warn('Could not load a longer featured-film synopsis:', error);
+        }
+      }
+
       heroMovie = movie;
       cache.set(movie.id, movie);
       renderHero(movie);

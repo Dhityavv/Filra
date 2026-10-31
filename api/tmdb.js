@@ -1,4 +1,5 @@
 const TMDB_API_BASE = 'https://api.themoviedb.org/3';
+const OVERVIEW_MIN_LENGTH = 120;
 const ALLOWED_ENDPOINTS = new Set([
   '/genre/movie/list',
   '/trending/movie/day',
@@ -107,9 +108,39 @@ module.exports = async function handler(req, res) {
       headers: { accept: 'application/json' },
       signal: controller.signal,
     });
-    const body = await upstream.text();
-    res.setHeader('Content-Type', upstream.headers.get('content-type') || 'application/json');
-    return res.status(upstream.status).send(body);
+    if (!upstream.ok) {
+      const body = await upstream.text();
+      res.setHeader('Content-Type', upstream.headers.get('content-type') || 'application/json');
+      return res.status(upstream.status).send(body);
+    }
+
+    const data = await upstream.json();
+    const localizedOverview = typeof data.overview === 'string' ? data.overview.trim() : '';
+    if (/^\/movie\/[1-9]\d*$/.test(endpoint) && localizedOverview.length < OVERVIEW_MIN_LENGTH) {
+      const englishUrl = new URL(url);
+      englishUrl.searchParams.set('language', 'en-US');
+
+      try {
+        const englishResponse = await fetch(englishUrl, {
+          headers: { accept: 'application/json' },
+          signal: controller.signal,
+        });
+        if (englishResponse.ok) {
+          const englishData = await englishResponse.json();
+          const englishOverview = typeof englishData.overview === 'string'
+            ? englishData.overview.trim()
+            : '';
+          if (englishOverview.length > localizedOverview.length) {
+            data.overview = englishOverview;
+          }
+        }
+      } catch (fallbackError) {
+        console.error('Failed to load English TMDB overview:', fallbackError);
+      }
+    }
+
+    res.setHeader('Content-Type', 'application/json; charset=utf-8');
+    return res.status(upstream.status).json(data);
   } catch (error) {
     if (error.name === 'AbortError') {
       return res.status(504).json({ error: 'Permintaan ke TMDB timeout. Coba lagi.' });
