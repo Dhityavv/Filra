@@ -27,6 +27,7 @@
     movies: [],
     genres: [],
     loading: false,
+    autoLoadPaused: false,
     requestId: 0,
   };
 
@@ -307,6 +308,7 @@
     if (!append) {
       state.page = 1;
       state.movies = [];
+      state.autoLoadPaused = false;
       el.grid.innerHTML = skeletonMarkup();
       el.grid.hidden = false;
       el.empty.hidden = true;
@@ -316,7 +318,8 @@
     updateLoadMore();
 
     try {
-      const params = { page: state.page, include_adult: 'false' };
+      const requestedPage = append ? state.page + 1 : 1;
+      const params = { page: requestedPage, include_adult: 'false' };
       let data;
 
       if (state.query) {
@@ -334,14 +337,22 @@
 
       const results = Array.isArray(data.results) ? data.results : [];
       results.forEach((movie) => cache.set(movie.id, movie));
+      state.page = requestedPage;
       state.movies = append ? state.movies.concat(results) : results;
       state.totalPages = Math.min(Number(data.total_pages) || 1, 500);
       renderGrid(append ? results : null);
       el.resultMeta.textContent = data.total_results ? `${fmtNumber(data.total_results)} film` : '';
     } catch (error) {
       if (requestId !== state.requestId) return;
-      state.movies = [];
-      renderError(error);
+      if (append && state.movies.length > 0) {
+        state.autoLoadPaused = true;
+        el.error.hidden = false;
+        el.errorText.textContent = error.message || 'Gagal memuat halaman berikutnya.';
+        el.retryBtn.textContent = 'Coba muat lagi';
+      } else {
+        state.movies = [];
+        renderError(error);
+      }
     } finally {
       if (requestId === state.requestId) {
         state.loading = false;
@@ -351,6 +362,7 @@
   }
 
   function renderGrid(newItems) {
+    el.retryBtn.textContent = 'Coba lagi';
     if (newItems) {
       el.grid.insertAdjacentHTML('beforeend', newItems.map(cardMarkup).join(''));
     } else {
@@ -377,7 +389,14 @@
     const hasMore = state.page < state.totalPages && state.movies.length > 0;
     el.loadMoreWrap.hidden = !hasMore;
     el.loadMoreBtn.disabled = state.loading;
-    el.loadMoreBtn.textContent = state.loading && state.page > 1 ? 'Memuat...' : 'Muat lebih banyak';
+    el.loadMoreBtn.textContent = state.loading && state.movies.length > 0 ? 'Memuat...' : 'Muat lebih banyak';
+  }
+
+  function loadNextPage({ automatic = false } = {}) {
+    if (automatic && state.autoLoadPaused) return;
+    if (state.loading || state.page >= state.totalPages || state.movies.length === 0) return;
+    state.autoLoadPaused = false;
+    loadMovies({ append: true });
   }
 
   function updateEmptyCopy() {
@@ -817,13 +836,15 @@
       loadMovies();
     });
 
-    el.loadMoreBtn.addEventListener('click', () => {
-      if (state.loading) return;
-      state.page += 1;
-      loadMovies({ append: true });
-    });
+    el.loadMoreBtn.addEventListener('click', () => loadNextPage());
 
-    el.retryBtn.addEventListener('click', () => loadMovies());
+    el.retryBtn.addEventListener('click', () => {
+      if (state.movies.length > 0 && state.page < state.totalPages) {
+        loadNextPage();
+      } else {
+        loadMovies();
+      }
+    });
 
     el.heroDetail.addEventListener('click', () => {
       if (heroMovie) openDetail(heroMovie.id);
@@ -921,6 +942,14 @@
 
     buildYearOptions();
     wireEvents();
+    if ('IntersectionObserver' in window) {
+      const loadMoreObserver = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting) && state.view === 'explore') {
+          loadNextPage({ automatic: true });
+        }
+      }, { rootMargin: '500px 0px' });
+      loadMoreObserver.observe(el.loadMoreWrap);
+    }
     updateBadges();
     initApp();
   }
