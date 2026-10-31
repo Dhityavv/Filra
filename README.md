@@ -12,6 +12,7 @@ Filra is a responsive movie discovery and rating app built with Next.js, TMDB, C
 - Ratings and reviews are public; each user's watchlist remains private
 - Signed-in ratings and watchlists sync by account; guest data stays in that browser
 - Dark and comfortable light themes
+- Filra Arcade with five movie mini games, daily challenges, XP progression, achievements, stats, and leaderboards
 
 ## Configure services
 
@@ -37,7 +38,17 @@ The service-role key must remain server-side and must never be exposed in browse
 
 Create a TMDB API key and configure it as `TMDB_API_KEY` on Vercel (and locally). The key is used only by the server-side `/api/tmdb` route.
 
-### 4. Local development
+### 4. Filra Arcade
+
+After running `supabase/schema.sql`, run [`supabase/arcade.sql`](./supabase/arcade.sql) in the Supabase SQL Editor. Arcade reuses the existing Clerk, Supabase, and `TMDB_API_KEY` configuration; it does not require additional environment variables.
+
+- Guests can play, but their progression is not saved.
+- Signed-in players get server-validated scores, XP, level, streak, achievements, and game history.
+- Daily challenges reset at 00:00 UTC. Weekly leaderboard XP is counted from Monday 00:00 UTC.
+- Arcade tables have RLS enabled and no client-access policies. All game state and progression writes use server-only Supabase credentials; the service-role key must never be exposed to the browser.
+- Game answers and correct scores are kept server-side. The API accepts guesses, not client-calculated score or XP.
+
+### 5. Local development
 
 Copy `.env.example` to `.env.local`, fill in the values from Clerk, Supabase, and TMDB, then run:
 
