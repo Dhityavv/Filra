@@ -46,9 +46,12 @@ function GameCard({ game, index }) {
         <span className="arcade-game-number">{game.icon}</span>
         <span className="arcade-game-category">{game.category}</span>
       </div>
-      <div className="arcade-game-art" aria-hidden="true">
-        <span className="arcade-game-orbit arcade-game-orbit-one" />
-        <span className="arcade-game-orbit arcade-game-orbit-two" />
+      <div className={`arcade-game-art arcade-game-art--${game.key}`} aria-hidden="true">
+        {game.key === 'guess-movie' ? <><span className="arcade-art-poster"><i /><i /><i /></span><span className="arcade-art-spotlight" /></> : null}
+        {game.key === 'trivia' ? <><span className="arcade-art-reel"><i /><i /><i /><i /><i /><i /></span><span className="arcade-art-question">?</span></> : null}
+        {game.key === 'higher-lower' ? <><span className="arcade-art-chart"><i /><i /><i /></span><span className="arcade-art-versus">VS</span></> : null}
+        {game.key === 'emoji' ? <><span className="arcade-art-emoji">🎬</span><span className="arcade-art-emoji arcade-art-emoji--second">🍿</span><span className="arcade-art-emoji arcade-art-emoji--third">✨</span></> : null}
+        {game.key === 'movie-wordle' ? <span className="arcade-art-tiles"><i>F</i><i>I</i><i>L</i><i>M</i><i>!</i></span> : null}
         <span className="arcade-game-art-index">0{index + 1}</span>
       </div>
       <h3>{game.title}</h3>
@@ -73,7 +76,7 @@ export default function ArcadeDashboard({ overview, error }) {
           <div className="arcade-hero-ring arcade-hero-ring-one" />
           <div className="arcade-hero-ring arcade-hero-ring-two" />
           <div className="arcade-hero-scanline" />
-          <span className="arcade-hero-stamp">FILRA<br />ARCADE</span>
+          <span className="arcade-hero-stamp">FILRA<br />MINIGAMES</span>
           <span className="arcade-hero-vertical">EST. FOR MOVIE LOVERS</span>
         </div>
       </section>
@@ -100,7 +103,7 @@ export default function ArcadeDashboard({ overview, error }) {
 
       <section className="arcade-section" id="games">
         <div className="arcade-section-heading">
-          <div><span className="arcade-eyebrow">CHOOSE YOUR CHALLENGE</span><h2>The arcade</h2></div>
+          <div><span className="arcade-eyebrow">CHOOSE YOUR CHALLENGE</span><h2>Minigames</h2></div>
           <span className="arcade-section-count">05 GAMES</span>
         </div>
         <div className="arcade-game-grid">

@@ -12,7 +12,7 @@ export default async function ArcadeHomePage() {
     if (loadError.message !== 'Supabase belum dikonfigurasi di server.') {
       console.error('Failed to load Arcade dashboard:', loadError);
     }
-    error = loadError.message || 'Data Arcade belum bisa dimuat.';
+    error = loadError.message || 'Data Minigames belum bisa dimuat.';
   }
   return <ArcadeDashboard error={error} overview={overview} />;
 }

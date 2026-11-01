@@ -55,7 +55,7 @@ export default function ArcadeStatistics() {
     <div className="arcade-subpage">
       <div className="arcade-page-title">
         <span className="arcade-eyebrow">PLAYER DATA</span><h1>Your statistics</h1>
-        <p>Perjalanan game dan progression Filra Arcade milik akunmu.</p>
+        <p>Perjalanan game dan progression Filra Minigames milik akunmu.</p>
       </div>
       <div className="arcade-stat-grid">
         <div><span>Total XP</span><strong>{Number(profile.xp).toLocaleString()}</strong></div>

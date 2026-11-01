@@ -11,17 +11,20 @@ async function requestJson(url, options) {
   return body;
 }
 
-function PersonRow({ user, actions }) {
+function PersonRow({ user, actions, featured = false }) {
   if (!user) return null;
+  const displayName = user.display_name || user.username;
+  const initials = displayName.trim().slice(0, 1).toLocaleUpperCase('id-ID') || '?';
   return (
-    <div className="community-row">
-      <div>
-        <Link className="community-row__name" href={`/u/${user.username}`}>
-          {user.display_name || user.username}
-        </Link>
-        <p className="community-muted">@{user.username}</p>
-        {user.bio ? <p className="community-muted">{user.bio}</p> : null}
-      </div>
+    <div className={`community-row${featured ? ' community-friend-card' : ''}`}>
+      <Link className="community-person-link" href={`/u/${user.username}`}>
+        <span aria-hidden="true" className="community-avatar">{initials}</span>
+        <span className="community-person-copy">
+          <span className="community-row__name">{displayName}</span>
+          <span className="community-muted">@{user.username}</span>
+          {user.bio ? <span className="community-muted">{user.bio}</span> : null}
+        </span>
+      </Link>
       <div className="community-row__actions">{actions}</div>
     </div>
   );
@@ -205,6 +208,7 @@ export default function CommunityPage() {
           {friends.friends.map((item) => (
             <PersonRow
               actions={<button className="btn btn--ghost btn--sm" onClick={() => removeFriend(item.id)} type="button">Hapus teman</button>}
+              featured
               key={item.id}
               user={item.user}
             />

@@ -71,7 +71,7 @@ function ResultPanel({ result, game, onAgain, mode }) {
       ) : null}
       <div className="arcade-result-actions">
         <button className="arcade-primary-button" onClick={onAgain} type="button">{mode === 'daily' ? 'Try another mode' : 'Play again'}</button>
-        <a className="arcade-outline-button" href="/arcade">Back to arcade</a>
+        <a className="arcade-outline-button" href="/arcade">Back to minigames</a>
       </div>
       <span className="arcade-result-game">{game.title} / {GAME_MODES[game.key][mode].label}</span>
     </section>
@@ -215,7 +215,7 @@ export default function ArcadeGame({ gameKey, initialMode = '' }) {
   return (
     <div className="arcade-game-page">
       <div className="arcade-game-heading">
-        <a href="/arcade" className="arcade-back-link">← Arcade</a>
+        <a href="/arcade" className="arcade-back-link">← Minigames</a>
         <span className="arcade-eyebrow">{game.category} / GAME {game.icon}</span>
         <h1>{game.title}</h1>
         <p>{game.description}</p>
@@ -245,7 +245,7 @@ export default function ArcadeGame({ gameKey, initialMode = '' }) {
                   fill
                   sizes="(max-width: 620px) 68vw, 270px"
                   unoptimized
-                  style={{ filter: `blur(${Math.max(3, 16 - session.question.hintsUsed * 4)}px)` }}
+                  style={{ filter: `blur(${Math.max(2, 10 - session.question.hintsUsed * 2)}px)` }}
                 />
                 <span>IDENTIFY THE FILM</span>
               </div>

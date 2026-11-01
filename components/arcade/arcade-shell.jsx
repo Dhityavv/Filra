@@ -3,7 +3,7 @@ import ArcadeAccount from './arcade-account';
 import { ARCADE_GAMES } from '../../lib/arcade/definitions';
 
 const navigation = [
-  { href: '/arcade', label: 'Arcade home', code: 'A' },
+  { href: '/arcade', label: 'Minigames home', code: 'M' },
   { href: '/arcade/leaderboard', label: 'Leaderboard', code: 'L' },
   { href: '/arcade/statistics', label: 'Your stats', code: 'S' },
 ];
@@ -12,12 +12,12 @@ export default function ArcadeShell({ children }) {
   return (
     <div className="arcade-app">
       <aside className="arcade-sidebar">
-        <Link className="arcade-brand" href="/arcade" aria-label="Filra Arcade home">
+        <Link className="arcade-brand" href="/arcade" aria-label="Filra Minigames home">
           <span className="arcade-brand-mark">F</span>
-          <span>FILRA <b>ARCADE</b></span>
+          <span>FILRA <b>MINIGAMES</b></span>
         </Link>
         <p className="arcade-sidebar-label">PLAY</p>
-        <nav className="arcade-nav" aria-label="Arcade navigation">
+        <nav className="arcade-nav" aria-label="Minigames navigation">
           {navigation.map((item) => (
             <Link href={item.href} className="arcade-nav-link" key={item.href}>
               <span className="arcade-nav-code">{item.code}</span>{item.label}
@@ -40,14 +40,14 @@ export default function ArcadeShell({ children }) {
       <div className="arcade-stage">
         <header className="arcade-topbar">
           <div className="arcade-mobile-brand">
-            <span className="arcade-brand-mark">F</span> ARCADE
+            <span className="arcade-brand-mark">F</span> MINIGAMES
           </div>
           <span className="arcade-topbar-caption">A CINEMATIC PLAYGROUND FOR MOVIE LOVERS</span>
           <ArcadeAccount />
         </header>
         <main className="arcade-main">{children}</main>
         <footer className="arcade-footer">
-          <span>FILRA ARCADE</span>
+          <span>FILRA MINIGAMES</span>
           <span>Movie data and images by TMDB</span>
         </footer>
       </div>
