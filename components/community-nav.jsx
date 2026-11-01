@@ -1,16 +1,16 @@
-import Link from 'next/link';
+import DocumentLink from './document-link';
 
 export default function CommunityNav() {
   return (
     <header className="community-nav">
-      <Link className="brand" href="/">
+      <DocumentLink className="brand" href="/">
         <span className="brand__mark">F</span>
         <span className="brand__name">Filra<span>Film Rating</span></span>
-      </Link>
+      </DocumentLink>
       <nav aria-label="Navigasi akun">
-        <Link href="/minigames">Minigames</Link>
-        <Link href="/community">Teman</Link>
-        <Link href="/account">Profil saya</Link>
+        <DocumentLink href="/minigames">Minigames</DocumentLink>
+        <DocumentLink href="/community">Teman</DocumentLink>
+        <DocumentLink href="/account">Profil saya</DocumentLink>
       </nav>
     </header>
   );

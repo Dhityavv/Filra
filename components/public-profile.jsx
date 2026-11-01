@@ -1,8 +1,8 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import CommunityNav from './community-nav';
+import DocumentLink from './document-link';
 import ProfileDashboard from './profile-dashboard';
 
 export default function PublicProfile({ username }) {
@@ -27,7 +27,7 @@ export default function PublicProfile({ username }) {
   }, [username]);
 
   if (error) {
-    return <><CommunityNav /><main className="community-page"><p className="community-error" role="alert">{error}</p><Link href="/">Kembali ke Filra</Link></main></>;
+    return <><CommunityNav /><main className="community-page"><p className="community-error" role="alert">{error}</p><DocumentLink href="/">Kembali ke Filra</DocumentLink></main></>;
   }
   if (!data) return <><CommunityNav /><main className="community-page"><p className="community-muted">Memuat profil...</p></main></>;
 

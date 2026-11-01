@@ -1,9 +1,9 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import CommunityNav from './community-nav';
+import DocumentLink from './document-link';
 
 async function requestJson(url, options) {
   const response = await fetch(url, { cache: 'no-store', ...options });
@@ -38,14 +38,14 @@ function PersonRow({ user, actions, featured = false }) {
   const displayName = user.display_name || user.username;
   return (
     <div className={`community-row${featured ? ' community-friend-card' : ''}`}>
-      <Link className="community-person-link" href={`/u/${user.username}`}>
+      <DocumentLink className="community-person-link" href={`/u/${user.username}`}>
         <CommunityAvatar displayName={displayName} imageUrl={user.image_url} />
         <span className="community-person-copy">
           <span className="community-row__name">{displayName}</span>
           <span className="community-muted">@{user.username}</span>
           {user.bio ? <span className="community-muted">{user.bio}</span> : null}
         </span>
-      </Link>
+      </DocumentLink>
       <div className="community-row__actions">{actions}</div>
     </div>
   );
@@ -156,7 +156,7 @@ export default function CommunityPage() {
           <h1 className="section-head__title">Cari teman</h1>
           <p className="community-muted">Temukan pengguna lewat username atau nama profil.</p>
         </div>
-        {currentUsername ? <Link className="btn btn--ghost btn--sm" href={`/u/${currentUsername}`}>Lihat profil saya</Link> : null}
+        {currentUsername ? <DocumentLink className="btn btn--ghost btn--sm" href={`/u/${currentUsername}`}>Lihat profil saya</DocumentLink> : null}
       </header>
 
       <section className="community-card" aria-labelledby="search-title">

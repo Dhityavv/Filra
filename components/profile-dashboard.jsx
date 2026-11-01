@@ -1,6 +1,6 @@
 import Image from 'next/image';
-import Link from 'next/link';
 import { FAVORITES_MIGRATION_MESSAGE } from '../lib/favorites';
+import DocumentLink from './document-link';
 
 function posterUrl(movie) {
   if (!movie?.poster_path) return '';
@@ -93,9 +93,9 @@ export default function ProfileDashboard({ data, isOwnProfile = false }) {
           </div>
           <div className="profile-identity-card__actions">
             {isOwnProfile ? (
-              <Link className="btn btn--ghost btn--sm" href="/account/manage">Manage account</Link>
+              <DocumentLink className="btn btn--ghost btn--sm" href="/account/manage">Manage account</DocumentLink>
             ) : (
-              <Link className="btn btn--ghost btn--sm" href="/community">Cari teman</Link>
+              <DocumentLink className="btn btn--ghost btn--sm" href="/community">Cari teman</DocumentLink>
             )}
           </div>
         </section>
