@@ -1,4 +1,5 @@
 import { getSupabaseAdmin } from '../../../../lib/supabase-admin';
+import { isFavoriteTableMissing } from '../../../../lib/favorites';
 
 export async function GET(_request, { params }) {
   const { username } = await params;
@@ -36,7 +37,8 @@ export async function GET(_request, { params }) {
     ]);
 
     if (ratings.error) throw ratings.error;
-    if (favorites.error) throw favorites.error;
+    const favoritesAvailable = !favorites.error;
+    if (favorites.error && !isFavoriteTableMissing(favorites.error)) throw favorites.error;
     if (watchlist.error) throw watchlist.error;
     return Response.json({
       profile: {
@@ -46,7 +48,8 @@ export async function GET(_request, { params }) {
         created_at: profile.data.created_at,
       },
       ratings: ratings.data,
-      favorites: favorites.data,
+      favorites: favorites.data || [],
+      favoritesAvailable,
       watchlist: watchlist.data,
     });
   } catch (error) {

@@ -1,4 +1,5 @@
 import { getCurrentIdentity } from '../../../../lib/auth';
+import { FAVORITES_MIGRATION_MESSAGE, isFavoriteTableMissing } from '../../../../lib/favorites';
 import { isValidMovieSnapshot } from '../../../../lib/movie-data';
 import { getOrCreateProfile } from '../../../../lib/profiles';
 import { readJsonObject } from '../../../../lib/request-body';
@@ -28,6 +29,9 @@ export async function PUT(request) {
       movie: body.movie,
       favorited_at: new Date().toISOString(),
     });
+    if (isFavoriteTableMissing(result.error)) {
+      return Response.json({ error: FAVORITES_MIGRATION_MESSAGE }, { status: 503 });
+    }
     if (result.error) throw result.error;
     return Response.json({ ok: true });
   } catch (error) {
@@ -52,6 +56,9 @@ export async function DELETE(request) {
       .delete()
       .eq('clerk_user_id', identity.userId)
       .eq('movie_id', movieId);
+    if (isFavoriteTableMissing(result.error)) {
+      return Response.json({ error: FAVORITES_MIGRATION_MESSAGE }, { status: 503 });
+    }
     if (result.error) throw result.error;
     return Response.json({ ok: true });
   } catch (error) {

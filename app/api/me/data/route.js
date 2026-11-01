@@ -1,4 +1,5 @@
 import { getCurrentIdentity } from '../../../../lib/auth';
+import { isFavoriteTableMissing } from '../../../../lib/favorites';
 import { getOrCreateProfile } from '../../../../lib/profiles';
 import { getSupabaseAdmin } from '../../../../lib/supabase-admin';
 
@@ -28,9 +29,15 @@ export async function GET() {
     ]);
 
     if (ratings.error) throw ratings.error;
-    if (favorites.error) throw favorites.error;
+    const favoritesAvailable = !favorites.error;
+    if (favorites.error && !isFavoriteTableMissing(favorites.error)) throw favorites.error;
     if (watchlist.error) throw watchlist.error;
-    return Response.json({ ratings: ratings.data, favorites: favorites.data, watchlist: watchlist.data });
+    return Response.json({
+      ratings: ratings.data,
+      favorites: favorites.data || [],
+      favoritesAvailable,
+      watchlist: watchlist.data,
+    });
   } catch (error) {
     console.error('Failed to load account movie data:', error);
     return Response.json({ error: 'Koleksi film akun gagal dimuat.' }, { status: 500 });

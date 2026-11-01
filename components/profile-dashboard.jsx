@@ -1,5 +1,6 @@
 import Image from 'next/image';
 import Link from 'next/link';
+import { FAVORITES_MIGRATION_MESSAGE } from '../lib/favorites';
 
 function posterUrl(movie) {
   if (!movie?.poster_path) return '';
@@ -7,7 +8,7 @@ function posterUrl(movie) {
   return `https://image.tmdb.org/t/p/w342${movie.poster_path}`;
 }
 
-function MovieCollection({ items, kind, title, eyebrow, emptyText }) {
+function MovieCollection({ items, kind, title, eyebrow, emptyText, available = true }) {
   return (
     <section className="community-card profile-collection">
       <div className="profile-section-heading">
@@ -48,13 +49,17 @@ function MovieCollection({ items, kind, title, eyebrow, emptyText }) {
             );
           })}
         </div>
-      ) : <p className="community-muted">{emptyText}</p>}
+      ) : (
+        <p className={available ? 'community-muted' : 'community-error'} role={available ? undefined : 'status'}>
+          {available ? emptyText : FAVORITES_MIGRATION_MESSAGE}
+        </p>
+      )}
     </section>
   );
 }
 
 export default function ProfileDashboard({ data, isOwnProfile = false }) {
-  const { profile, ratings, favorites = [], watchlist = [] } = data;
+  const { profile, ratings, favorites = [], favoritesAvailable = true, watchlist = [] } = data;
   const displayName = profile.display_name || profile.username;
   const initials = displayName.trim().slice(0, 1).toLocaleUpperCase('id-ID') || '?';
 
@@ -83,11 +88,12 @@ export default function ProfileDashboard({ data, isOwnProfile = false }) {
       </header>
 
       <MovieCollection
-        emptyText="Belum ada film yang ditambahkan ke favorit."
+        emptyText={favoritesAvailable ? 'Belum ada film yang ditambahkan ke favorit.' : 'Koleksi favorit belum tersedia.'}
         eyebrow="KOLEKSI PILIHAN"
         items={favorites}
         kind="favorite"
         title="Film favorit"
+        available={favoritesAvailable}
       />
       <MovieCollection
         emptyText="Belum ada rating publik."
