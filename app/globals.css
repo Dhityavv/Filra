@@ -3,7 +3,7 @@
 }
 
 .community-page {
-  width: min(100% - 48px, 900px);
+  width: min(100% - 48px, var(--container));
   margin: 28px auto 64px;
 }
 
@@ -15,7 +15,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 12px max(24px, calc((100% - 900px) / 2));
+  padding: 12px max(24px, calc((100% - var(--container)) / 2));
   border-bottom: 1px solid var(--line);
   background: var(--bg-elev);
 }
@@ -47,7 +47,19 @@
 
 .community-form {
   display: flex;
+  align-items: center;
   gap: 10px;
+}
+
+.community-form .btn {
+  min-height: 40px;
+  padding: 8px 17px;
+  font-size: 12px;
+}
+
+.community-row__actions .btn {
+  padding: 7px 12px;
+  font-size: 11px;
 }
 
 .community-form input,
@@ -152,8 +164,8 @@
 }
 
 .community-friend-card {
-  min-height: 116px;
-  padding: 20px;
+  min-height: 136px;
+  padding: 24px;
   border-color: color-mix(in srgb, var(--gold) 20%, var(--line));
   background:
     radial-gradient(ellipse at 0% 50%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 55%),
@@ -168,24 +180,19 @@
 
 .community-friend-card .community-person-link {
   flex: 1;
-  min-height: 72px;
+  min-height: 84px;
 }
 
 .community-friend-card .community-avatar {
-  width: 64px;
-  height: 64px;
-  flex-basis: 64px;
-  border-radius: 21px;
-  font-size: 25px;
+  width: 76px;
+  height: 76px;
+  flex-basis: 76px;
+  border-radius: 24px;
+  font-size: 29px;
 }
 
 .community-friend-card .community-row__name {
-  font-size: 17px;
-}
-
-.community-friend-card .community-row__actions .btn {
-  padding: 7px 10px;
-  font-size: 11px;
+  font-size: 19px;
 }
 
 .profile-hero {
@@ -662,7 +669,7 @@
 
 @media (max-width: 720px) {
   .profile-dashboard {
-    width: min(100% - 32px, 900px);
+    width: min(100% - 32px, var(--container));
     grid-template-columns: minmax(0, 1fr);
     gap: 8px;
   }
@@ -680,7 +687,7 @@
   }
 
   .community-page {
-    width: min(100% - 32px, 900px);
+    width: min(100% - 32px, var(--container));
   }
 
   .community-nav {
@@ -710,12 +717,22 @@
     flex-direction: column;
   }
 
+  .community-form .btn {
+    align-self: flex-end;
+  }
+
   .community-friend-card {
     gap: 14px;
   }
 
   .community-friend-card .community-person-link {
     min-height: 0;
+  }
+
+  .community-friend-card .community-avatar {
+    width: 68px;
+    height: 68px;
+    flex-basis: 68px;
   }
 
   .community-friend-card .community-row__actions {
@@ -747,5 +764,12 @@
   .community-nav nav {
     gap: 10px;
     font-size: 12px;
+  }
+}
+
+@media (max-width: 560px) {
+  .community-page,
+  .profile-dashboard {
+    width: min(100% - 28px, var(--container));
   }
 }
