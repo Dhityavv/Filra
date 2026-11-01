@@ -45,6 +45,115 @@
   background: var(--bg-elev);
 }
 
+.community-sections {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 12px;
+  margin-top: 26px;
+}
+
+.community-section-tab {
+  display: flex;
+  min-width: 0;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 15px 18px;
+  border: 1px solid var(--community-tab-color);
+  border-radius: 14px;
+  background: color-mix(in srgb, var(--community-tab-color) 8%, var(--bg-elev));
+  color: color-mix(in srgb, var(--community-tab-color) 76%, white);
+  font: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-align: left;
+  transition: background .18s ease, box-shadow .18s ease, transform .18s ease;
+}
+
+.community-section-tab:hover {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--community-tab-color) 14%, var(--bg-elev));
+}
+
+.community-section-tab[aria-selected="true"] {
+  background: color-mix(in srgb, var(--community-tab-color) 20%, var(--bg-elev));
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--community-tab-color) 38%, transparent);
+}
+
+.community-section-tab--friends {
+  --community-tab-color: #b39aff;
+}
+
+.community-section-tab--incoming {
+  --community-tab-color: #fb7185;
+}
+
+.community-section-tab--outgoing {
+  --community-tab-color: #4ade80;
+}
+
+.community-section-tab--search {
+  --community-tab-color: #60a5fa;
+}
+
+.community-section-tab__count {
+  display: grid;
+  min-width: 25px;
+  height: 25px;
+  place-items: center;
+  padding-inline: 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--community-tab-color) 16%, transparent);
+  font-size: 11px;
+}
+
+.community-panel {
+  min-height: 230px;
+  margin-top: 16px;
+}
+
+.community-panel > h2,
+.community-panel__heading h2 {
+  font-size: 20px;
+}
+
+.community-panel__description {
+  margin-top: 5px;
+}
+
+.community-panel__heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.community-panel__total {
+  flex: 0 0 auto;
+  padding: 7px 12px;
+  border: 1px solid color-mix(in srgb, var(--gold) 28%, var(--line));
+  border-radius: 999px;
+  background: var(--gold-soft);
+  color: var(--gold-strong);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.community-panel__empty {
+  margin-top: 24px;
+  padding: 28px 20px;
+  border: 1px dashed var(--line-strong);
+  border-radius: 14px;
+  text-align: center;
+}
+
+.community-friends-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+  margin-top: 18px;
+}
+
 .community-form {
   display: flex;
   align-items: center;
@@ -164,8 +273,10 @@
 }
 
 .community-friend-card {
-  min-height: 136px;
-  padding: 24px;
+  min-height: 174px;
+  align-items: stretch;
+  flex-direction: column;
+  padding: 20px;
   border-color: color-mix(in srgb, var(--gold) 20%, var(--line));
   background:
     radial-gradient(ellipse at 0% 50%, color-mix(in srgb, var(--gold) 10%, transparent), transparent 55%),
@@ -193,6 +304,12 @@
 
 .community-friend-card .community-row__name {
   font-size: 19px;
+}
+
+.community-friend-card .community-row__actions {
+  justify-content: flex-end;
+  margin-top: auto;
+  padding-top: 12px;
 }
 
 .profile-hero {
@@ -690,6 +807,21 @@
     width: min(100% - 32px, var(--container));
   }
 
+  .community-sections {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 9px;
+    margin-top: 20px;
+  }
+
+  .community-section-tab {
+    padding: 12px;
+    font-size: 12px;
+  }
+
+  .community-friends-grid {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
   .community-nav {
     flex-wrap: wrap;
     padding-inline: 16px;
@@ -733,6 +865,11 @@
     width: 68px;
     height: 68px;
     flex-basis: 68px;
+  }
+
+  .community-friend-card .community-row__actions {
+    margin-top: 0;
+    padding-top: 0;
   }
 
   .community-friend-card .community-row__actions {

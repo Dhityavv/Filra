@@ -56,6 +56,7 @@ export default function CommunityPage() {
   const [users, setUsers] = useState([]);
   const [friends, setFriends] = useState({ incoming: [], outgoing: [], friends: [] });
   const [currentUsername, setCurrentUsername] = useState('');
+  const [activeSection, setActiveSection] = useState('friends');
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(true);
@@ -137,6 +138,7 @@ export default function CommunityPage() {
       });
       setMessage(`Permintaan pertemanan ke @${username} sudah dikirim.`);
       await refreshFriends();
+      setActiveSection('outgoing');
     } catch (cause) {
       setError(cause.message);
     }
@@ -145,6 +147,12 @@ export default function CommunityPage() {
   const friendIds = new Set(friends.friends.map((item) => item.user?.username));
   const outgoingIds = new Set(friends.outgoing.map((item) => item.user?.username));
   const incomingIds = new Set(friends.incoming.map((item) => item.user?.username));
+  const sections = [
+    { id: 'friends', label: 'Teman', count: friends.friends.length },
+    { id: 'incoming', label: 'Permintaan masuk', count: friends.incoming.length },
+    { id: 'outgoing', label: 'Terkirim', count: friends.outgoing.length },
+    { id: 'search', label: 'Cari teman' },
+  ];
 
   return (
     <>
@@ -154,91 +162,134 @@ export default function CommunityPage() {
         <div>
           <p className="eyebrow">Komunitas Filra</p>
           <h1 className="section-head__title">Cari teman</h1>
-          <p className="community-muted">Temukan pengguna lewat username atau nama profil.</p>
+          <p className="community-muted">Kelola teman dan permintaan pertemananmu.</p>
         </div>
         {currentUsername ? <DocumentLink className="btn btn--ghost btn--sm" href={`/u/${currentUsername}`}>Lihat profil saya</DocumentLink> : null}
       </header>
 
-      <section className="community-card" aria-labelledby="search-title">
-        <h2 id="search-title">Cari pengguna</h2>
-        <form className="community-form" onSubmit={search}>
-          <input
-            aria-label="Username atau nama"
-            autoComplete="off"
-            maxLength={40}
-            onChange={(event) => setQuery(event.target.value)}
-            placeholder="Contoh: namapengguna"
-            value={query}
-          />
-          <button className="btn btn--primary" type="submit">Cari</button>
-        </form>
-        <div className="community-list">
-          {users.map((user) => {
-            const isFriend = friendIds.has(user.username);
-            const isOutgoing = outgoingIds.has(user.username);
-            const isIncoming = incomingIds.has(user.username);
-            const actions = isFriend
-              ? <span className="community-muted">Sudah berteman</span>
-              : isOutgoing
-                ? <span className="community-muted">Menunggu persetujuan</span>
-                : isIncoming
-                  ? <span className="community-muted">Cek permintaan masuk</span>
-                  : <button className="btn btn--primary btn--sm" onClick={() => sendRequest(user.username)} type="button">Tambah teman</button>;
-            return <PersonRow actions={actions} key={user.username} user={user} />;
-          })}
-        </div>
-        {users.length === 0 && query.trim().length >= 2 ? <p className="community-muted">Tidak ada pengguna yang cocok.</p> : null}
+      <nav aria-label="Kategori teman" className="community-sections">
+        {sections.map((section) => (
+          <button
+            aria-pressed={activeSection === section.id}
+            className={`community-section-tab community-section-tab--${section.id}`}
+            key={section.id}
+            onClick={() => setActiveSection(section.id)}
+            type="button"
+          >
+            <span>{section.label}</span>
+            {section.count !== undefined ? <span className="community-section-tab__count">{section.count}</span> : null}
+          </button>
+        ))}
+      </nav>
+
+      <section
+        aria-label={sections.find((section) => section.id === activeSection)?.label}
+        className="community-card community-panel"
+        id="community-panel"
+        aria-live="polite"
+      >
+        {activeSection === 'search' ? (
+          <>
+            <h2>Cari pengguna</h2>
+            <p className="community-muted community-panel__description">Temukan pengguna lewat username atau nama profil.</p>
+            <form className="community-form" onSubmit={search}>
+              <input
+                aria-label="Username atau nama"
+                autoComplete="off"
+                maxLength={40}
+                onChange={(event) => setQuery(event.target.value)}
+                placeholder="Contoh: namapengguna"
+                value={query}
+              />
+              <button className="btn btn--primary" type="submit">Cari</button>
+            </form>
+            <div className="community-list">
+              {users.map((user) => {
+                const isFriend = friendIds.has(user.username);
+                const isOutgoing = outgoingIds.has(user.username);
+                const isIncoming = incomingIds.has(user.username);
+                const actions = isFriend
+                  ? <span className="community-muted">Sudah berteman</span>
+                  : isOutgoing
+                    ? <span className="community-muted">Menunggu persetujuan</span>
+                    : isIncoming
+                      ? <span className="community-muted">Cek permintaan masuk</span>
+                      : <button className="btn btn--primary btn--sm" onClick={() => sendRequest(user.username)} type="button">Tambah teman</button>;
+                return <PersonRow actions={actions} key={user.username} user={user} />;
+              })}
+            </div>
+            {users.length === 0 && query.trim().length >= 2 ? <p className="community-muted">Tidak ada pengguna yang cocok.</p> : null}
+          </>
+        ) : null}
+
+        {activeSection === 'incoming' ? (
+          <>
+            <h2>Permintaan masuk ({friends.incoming.length})</h2>
+            <div className="community-list">
+              {friends.incoming.map((item) => (
+                <PersonRow
+                  actions={
+                    <>
+                      <button className="btn btn--primary btn--sm" onClick={() => updateRequest(item.id, 'accept')} type="button">Terima</button>
+                      <button className="btn btn--ghost btn--sm" onClick={() => updateRequest(item.id, 'decline')} type="button">Tolak</button>
+                    </>
+                  }
+                  key={item.id}
+                  user={item.user}
+                />
+              ))}
+              {loading ? <p className="community-muted">Memuat permintaan...</p> : null}
+              {!loading && friends.incoming.length === 0 ? <p className="community-muted">Belum ada permintaan masuk.</p> : null}
+            </div>
+          </>
+        ) : null}
+
+        {activeSection === 'outgoing' ? (
+          <>
+            <h2>Permintaan terkirim ({friends.outgoing.length})</h2>
+            <div className="community-list">
+              {friends.outgoing.map((item) => (
+                <PersonRow
+                  actions={<button className="btn btn--ghost btn--sm" onClick={() => updateRequest(item.id, 'cancel')} type="button">Batalkan</button>}
+                  key={item.id}
+                  user={item.user}
+                />
+              ))}
+              {loading ? <p className="community-muted">Memuat permintaan...</p> : null}
+              {!loading && friends.outgoing.length === 0 ? <p className="community-muted">Belum ada permintaan terkirim.</p> : null}
+            </div>
+          </>
+        ) : null}
+
+        {activeSection === 'friends' ? (
+          <>
+            <div className="community-panel__heading">
+              <div>
+                <h2>Teman</h2>
+                <p className="community-muted">Klik kartu untuk melihat profil dan koleksi film mereka.</p>
+              </div>
+              <span className="community-panel__total">{friends.friends.length} teman</span>
+            </div>
+            {friends.friends.length ? (
+              <div className="community-friends-grid">
+                {friends.friends.map((item) => (
+                  <PersonRow
+                    actions={<button className="btn btn--ghost btn--sm" onClick={() => removeFriend(item.id)} type="button">Hapus teman</button>}
+                    featured
+                    key={item.id}
+                    user={item.user}
+                  />
+                ))}
+              </div>
+            ) : (
+              <p className="community-muted community-panel__empty">
+                {loading ? 'Memuat teman...' : 'Kamu belum punya teman di Filra.'}
+              </p>
+            )}
+          </>
+        ) : null}
       </section>
 
-      <section className="community-card" aria-labelledby="requests-title">
-        <h2 id="requests-title">Permintaan masuk ({friends.incoming.length})</h2>
-        <div className="community-list">
-          {friends.incoming.map((item) => (
-            <PersonRow
-              actions={
-                <>
-                  <button className="btn btn--primary btn--sm" onClick={() => updateRequest(item.id, 'accept')} type="button">Terima</button>
-                  <button className="btn btn--ghost btn--sm" onClick={() => updateRequest(item.id, 'decline')} type="button">Tolak</button>
-                </>
-              }
-              key={item.id}
-              user={item.user}
-            />
-          ))}
-          {!loading && friends.incoming.length === 0 ? <p className="community-muted">Belum ada permintaan masuk.</p> : null}
-        </div>
-      </section>
-
-      <section className="community-card" aria-labelledby="sent-title">
-        <h2 id="sent-title">Permintaan terkirim ({friends.outgoing.length})</h2>
-        <div className="community-list">
-          {friends.outgoing.map((item) => (
-            <PersonRow
-              actions={<button className="btn btn--ghost btn--sm" onClick={() => updateRequest(item.id, 'cancel')} type="button">Batalkan</button>}
-              key={item.id}
-              user={item.user}
-            />
-          ))}
-          {!loading && friends.outgoing.length === 0 ? <p className="community-muted">Belum ada permintaan terkirim.</p> : null}
-        </div>
-      </section>
-
-      <section className="community-card" aria-labelledby="friends-title">
-        <h2 id="friends-title">Teman ({friends.friends.length})</h2>
-        <div className="community-list">
-          {friends.friends.map((item) => (
-            <PersonRow
-              actions={<button className="btn btn--ghost btn--sm" onClick={() => removeFriend(item.id)} type="button">Hapus teman</button>}
-              featured
-              key={item.id}
-              user={item.user}
-            />
-          ))}
-          {!loading && friends.friends.length === 0 ? <p className="community-muted">Kamu belum punya teman di Filra.</p> : null}
-        </div>
-      </section>
-
-      {loading ? <p className="community-muted">Memuat komunitas...</p> : null}
       {message ? <p className="community-muted" role="status">{message}</p> : null}
       {error ? <p className="community-error" role="alert">{error}</p> : null}
     </main>
