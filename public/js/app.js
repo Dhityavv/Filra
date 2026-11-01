@@ -5,6 +5,7 @@
   const LANGUAGE = 'id-ID';
   const KEYS = {
     ratings: 'ratefilm.ratings.v1',
+    favorites: 'ratefilm.favorites.v1',
     watchlist: 'ratefilm.watchlist.v1',
   };
 
@@ -35,6 +36,7 @@
   const el = {};
   let heroMovie = null;
   let ratings = readJSON(KEYS.ratings, {});
+  let favorites = readJSON(KEYS.favorites, {});
   let watchlist = readJSON(KEYS.watchlist, {});
   let accountUserId = null;
   let accountReady = false;
@@ -136,6 +138,10 @@
               updatedAt: new Date(item.updated_at).getTime(),
             },
           ]));
+          favorites = Object.fromEntries(data.favorites.map((item) => [
+            item.movie_id,
+            { ...item.movie, favoritedAt: new Date(item.favorited_at).getTime() },
+          ]));
           watchlist = Object.fromEntries(data.watchlist.map((item) => [
             item.movie_id,
             { ...item.movie, addedAt: new Date(item.added_at).getTime() },
@@ -143,11 +149,13 @@
         } catch (error) {
           if (requestId !== identityRequestId) return;
           ratings = {};
+          favorites = {};
           watchlist = {};
           showToast(error.message);
         }
       } else {
         ratings = readJSON(KEYS.ratings, {});
+        favorites = readJSON(KEYS.favorites, {});
         watchlist = readJSON(KEYS.watchlist, {});
       }
 
@@ -156,6 +164,7 @@
       pendingIdentity = null;
       el.appView.hidden = false;
       updateBadges();
+      renderFavorites();
       renderWatchlist();
       renderRatings();
       Object.keys(ratings).forEach(updateCardRating);
@@ -287,6 +296,7 @@
 
   function cardMarkup(movie) {
     const saved = Boolean(watchlist[movie.id]);
+    const favorite = Boolean(favorites[movie.id]);
     const rating = ratings[movie.id];
     const year = movieYear(movie);
     return `<article class="card" data-id="${movie.id}">
@@ -302,6 +312,7 @@
         </span>
       </button>
       <button class="card__save ${saved ? 'is-saved' : ''}" type="button" data-save="${movie.id}" aria-pressed="${saved}" aria-label="${saved ? 'Hapus dari watchlist' : 'Tambah ke watchlist'}" title="${saved ? 'Hapus dari watchlist' : 'Tambah ke watchlist'}">${icon('bookmark')}</button>
+      <button class="card__favorite ${favorite ? 'is-favorite' : ''}" type="button" data-favorite="${movie.id}" aria-pressed="${favorite}" aria-label="${favorite ? 'Hapus dari favorit' : 'Tambah ke favorit'}" title="${favorite ? 'Hapus dari favorit' : 'Tambah ke favorit'}">${icon('heart')}</button>
       ${rating ? `<span class="card__rating" title="Rating kamu">${icon('star')}${rating.score}</span>` : ''}
     </article>`;
   }
@@ -549,8 +560,10 @@
   function updateBadges() {
     const watchlistCount = Object.keys(watchlist).length;
     const ratingsCount = Object.keys(ratings).length;
+    const favoritesCount = Object.keys(favorites).length;
     $$('[data-count="watchlist"]').forEach((node) => { node.textContent = watchlistCount; });
     $$('[data-count="ratings"]').forEach((node) => { node.textContent = ratingsCount; });
+    $$('[data-count="favorites"]').forEach((node) => { node.textContent = favoritesCount; });
   }
 
   function updateSaveButtons(id) {
@@ -568,6 +581,24 @@
       detailButton.innerHTML = saved ? `${icon('check')} Tersimpan di watchlist` : `${icon('bookmark')} Tambah ke watchlist`;
     }
     updateHeroSave();
+  }
+
+  function updateFavoriteButtons(id) {
+    const favorite = Boolean(favorites[id]);
+    $$(`[data-favorite="${id}"]`).forEach((button) => {
+      button.classList.toggle('is-favorite', favorite);
+      button.setAttribute('aria-pressed', String(favorite));
+      button.setAttribute('aria-label', favorite ? 'Hapus dari favorit' : 'Tambah ke favorit');
+      button.setAttribute('title', favorite ? 'Hapus dari favorit' : 'Tambah ke favorit');
+    });
+    const detailButton = $('#detailFavorite', el.modalBody);
+    if (detailButton) {
+      detailButton.classList.toggle('is-saved', favorite);
+      detailButton.setAttribute('aria-pressed', String(favorite));
+      detailButton.innerHTML = favorite
+        ? `${icon('heart')} Hapus dari favorit`
+        : `${icon('heart')} Tambah ke favorit`;
+    }
   }
 
   function updateCardRating(id) {
@@ -622,6 +653,49 @@
     if (state.view === 'watchlist') renderWatchlist();
   }
 
+  async function toggleFavorite(movie) {
+    if (!movie) return;
+    const removing = Boolean(favorites[movie.id]);
+    const nextFavorites = { ...favorites };
+    const entry = { ...snapshot(movie), favoritedAt: Date.now() };
+    if (removing) {
+      delete nextFavorites[movie.id];
+    } else {
+      nextFavorites[movie.id] = entry;
+    }
+
+    const owner = accountUserId;
+    try {
+      const saved = await persistMovieCollection(
+        'favorites',
+        removing ? 'DELETE' : 'PUT',
+        movie,
+        entry,
+        nextFavorites,
+      );
+      if (!saved || owner !== accountUserId) return;
+    } catch (error) {
+      showToast(error.message);
+      return;
+    }
+
+    favorites = nextFavorites;
+    showToast(removing
+      ? `“${movie.title}” dihapus dari favorit.`
+      : `“${movie.title}” ditambahkan ke favorit.`);
+    updateBadges();
+    updateFavoriteButtons(movie.id);
+    if (state.view === 'favorites') renderFavorites();
+  }
+
+  function renderFavorites() {
+    const items = Object.values(favorites).sort((a, b) => b.favoritedAt - a.favoritedAt);
+    items.forEach((movie) => cache.set(movie.id, movie));
+    el.favoritesGrid.innerHTML = items.map(cardMarkup).join('');
+    el.favoritesGrid.hidden = items.length === 0;
+    el.favoritesEmpty.hidden = items.length > 0;
+  }
+
   function renderWatchlist() {
     const items = Object.values(watchlist).sort((a, b) => b.addedAt - a.addedAt);
     items.forEach((movie) => cache.set(movie.id, movie));
@@ -657,9 +731,11 @@
       tab.setAttribute('aria-pressed', String(active));
     });
     el.exploreView.hidden = view !== 'explore';
+    el.favoritesView.hidden = view !== 'favorites';
     el.watchlistView.hidden = view !== 'watchlist';
     el.ratingsView.hidden = view !== 'ratings';
     updateHeroVisibility();
+    if (view === 'favorites') renderFavorites();
     if (view === 'watchlist') renderWatchlist();
     if (view === 'ratings') renderRatings();
     window.scrollTo(0, 0);
@@ -721,6 +797,7 @@
 
   function renderDetail(movie) {
     const saved = Boolean(watchlist[movie.id]);
+    const favorite = Boolean(favorites[movie.id]);
     const existing = ratings[movie.id];
     const score = existing ? Number(existing.score) : 0;
     const runtime = movie.runtime ? `${Math.floor(movie.runtime / 60)}j ${movie.runtime % 60}m` : '';
@@ -748,6 +825,7 @@
           <p class="detail__overview">${esc(movie.overview || 'Sinopsis belum tersedia untuk film ini.')}</p>
           <div class="detail__actions">
             <button class="btn btn--ghost ${saved ? 'is-saved' : ''}" id="detailSave" type="button" aria-pressed="${saved}">${saved ? `${icon('check')} Tersimpan di watchlist` : `${icon('bookmark')} Tambah ke watchlist`}</button>
+            <button class="btn btn--ghost ${favorite ? 'is-saved' : ''}" id="detailFavorite" data-favorite="${movie.id}" type="button" aria-pressed="${favorite}">${favorite ? `${icon('heart')} Hapus dari favorit` : `${icon('heart')} Tambah ke favorit`}</button>
           </div>
         </div>
 
@@ -847,6 +925,7 @@
     }
 
     $('#detailSave', el.modalBody).addEventListener('click', () => toggleWatchlist(movie));
+    $('#detailFavorite', el.modalBody).addEventListener('click', () => toggleFavorite(movie));
   }
 
   // ------------------------------------------------------------------ boot
@@ -861,6 +940,12 @@
   }
 
   function handleGridClick(event) {
+    const favoriteButton = event.target.closest('[data-favorite]');
+    if (favoriteButton) {
+      const movie = cache.get(Number(favoriteButton.dataset.favorite));
+      if (movie) toggleFavorite(movie);
+      return;
+    }
     const saveButton = event.target.closest('[data-save]');
     if (saveButton) {
       const movie = cache.get(Number(saveButton.dataset.save));
@@ -876,6 +961,7 @@
     loadGenres();
     loadHero();
     loadMovies();
+    if (state.view === 'favorites') renderFavorites();
     if (state.view === 'watchlist') renderWatchlist();
     if (state.view === 'ratings') renderRatings();
   }
@@ -968,6 +1054,7 @@
     el.heroImg.addEventListener('error', () => el.hero.classList.add('hero--no-image'));
 
     el.grid.addEventListener('click', handleGridClick);
+    el.favoritesGrid.addEventListener('click', handleGridClick);
     el.watchlistGrid.addEventListener('click', handleGridClick);
 
     el.ratingsList.addEventListener('click', async (event) => {
@@ -997,7 +1084,7 @@
       if (openButton) openDetail(Number(openButton.dataset.open));
     });
 
-    [el.watchlistExploreBtn, el.ratingsExploreBtn].forEach((button) => {
+    [el.favoritesExploreBtn, el.watchlistExploreBtn, el.ratingsExploreBtn].forEach((button) => {
       button.addEventListener('click', () => setView('explore'));
     });
 
@@ -1022,6 +1109,10 @@
       heroDetail: $('#heroDetail'),
       heroSave: $('#heroSave'),
       exploreView: $('#exploreView'),
+      favoritesView: $('#favoritesView'),
+      favoritesGrid: $('#favoritesGrid'),
+      favoritesEmpty: $('#favoritesEmpty'),
+      favoritesExploreBtn: $('#favoritesExploreBtn'),
       exploreEyebrow: $('#exploreEyebrow'),
       exploreTitle: $('#exploreTitle'),
       resultMeta: $('#resultMeta'),

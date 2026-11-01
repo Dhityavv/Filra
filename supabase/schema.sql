@@ -28,6 +28,14 @@ create table if not exists public.watchlist (
   primary key (clerk_user_id, movie_id)
 );
 
+create table if not exists public.favorite_movies (
+  clerk_user_id text not null references public.profiles(clerk_user_id) on delete cascade,
+  movie_id bigint not null,
+  movie jsonb not null,
+  favorited_at timestamptz not null default now(),
+  primary key (clerk_user_id, movie_id)
+);
+
 create table if not exists public.friend_requests (
   id uuid primary key default gen_random_uuid(),
   requester_id text not null references public.profiles(clerk_user_id) on delete cascade,
@@ -41,6 +49,7 @@ create table if not exists public.friend_requests (
 create index if not exists profiles_username_search on public.profiles (username);
 create index if not exists profiles_display_name_search on public.profiles (display_name);
 create index if not exists movie_ratings_user_recent on public.movie_ratings (clerk_user_id, updated_at desc);
+create index if not exists favorite_movies_user_recent on public.favorite_movies (clerk_user_id, favorited_at desc);
 create index if not exists friend_requests_recipient on public.friend_requests (recipient_id, status);
 create index if not exists friend_requests_requester on public.friend_requests (requester_id, status);
 create unique index if not exists friend_requests_unordered_pair
@@ -49,12 +58,14 @@ create unique index if not exists friend_requests_unordered_pair
 alter table public.profiles enable row level security;
 alter table public.movie_ratings enable row level security;
 alter table public.watchlist enable row level security;
+alter table public.favorite_movies enable row level security;
 alter table public.friend_requests enable row level security;
 
 drop policy if exists "Profiles are publicly readable" on public.profiles;
 drop policy if exists "Ratings are publicly readable" on public.movie_ratings;
 drop policy if exists "Users manage their own ratings" on public.movie_ratings;
 drop policy if exists "Users manage their own watchlist" on public.watchlist;
+drop policy if exists "Users manage their own favorite movies" on public.favorite_movies;
 drop policy if exists "Users manage their own friend requests" on public.friend_requests;
 
 create policy "Profiles are publicly readable" on public.profiles
@@ -65,6 +76,9 @@ create policy "Users manage their own ratings" on public.movie_ratings
   for all using (clerk_user_id = (auth.jwt() ->> 'sub'))
   with check (clerk_user_id = (auth.jwt() ->> 'sub'));
 create policy "Users manage their own watchlist" on public.watchlist
+  for all using (clerk_user_id = (auth.jwt() ->> 'sub'))
+  with check (clerk_user_id = (auth.jwt() ->> 'sub'));
+create policy "Users manage their own favorite movies" on public.favorite_movies
   for all using (clerk_user_id = (auth.jwt() ->> 'sub'))
   with check (clerk_user_id = (auth.jwt() ->> 'sub'));
 create policy "Users manage their own friend requests" on public.friend_requests

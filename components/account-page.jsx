@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
 import { useEffect, useState } from 'react';
+import AccountSecurity from './account-security';
 import CommunityNav from './community-nav';
 
 async function requestJson(url, options) {
@@ -25,7 +25,6 @@ export default function AccountPage() {
           username: data.username,
           displayName: data.display_name,
           bio: data.bio,
-          websiteUrl: data.website_url,
         });
       })
       .catch((cause) => {
@@ -55,7 +54,6 @@ export default function AccountPage() {
         username: saved.username,
         displayName: saved.display_name,
         bio: saved.bio,
-        websiteUrl: saved.website_url,
       });
       setMessage('Profil berhasil disimpan.');
     } catch (cause) {
@@ -70,7 +68,7 @@ export default function AccountPage() {
       <header className="section-head">
         <div>
           <p className="eyebrow">Akun Filra</p>
-          <h1 className="section-head__title">Atur profil</h1>
+          <h1 className="section-head__title">Manage account</h1>
         </div>
       </header>
       <section className="community-card">
@@ -80,7 +78,6 @@ export default function AccountPage() {
             <label>
               Username unik
               <input maxLength={24} minLength={3} onChange={(event) => update('username', event.target.value)} required value={profile.username} />
-              <span className="community-muted">Profil publik kamu: <Link href={`/u/${profile.username}`}>/u/{profile.username}</Link></span>
             </label>
             <label>
               Nama tampilan
@@ -90,16 +87,13 @@ export default function AccountPage() {
               Bio
               <textarea maxLength={300} onChange={(event) => update('bio', event.target.value)} rows={4} value={profile.bio} />
             </label>
-            <label>
-              Link profil
-              <input maxLength={200} onChange={(event) => update('websiteUrl', event.target.value)} placeholder="https://contoh.com" type="url" value={profile.websiteUrl} />
-            </label>
             <button className="btn btn--primary" disabled={loading} type="submit">Simpan profil</button>
           </form>
         ) : null}
         {message ? <p className="community-muted" role="status">{message}</p> : null}
         {error ? <p className="community-error" role="alert">{error}</p> : null}
       </section>
+      {process.env.NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY ? <AccountSecurity /> : null}
     </main>
     </>
   );

@@ -11,7 +11,6 @@ export async function GET() {
       username: stored.username,
       display_name: stored.display_name,
       bio: stored.bio,
-      website_url: stored.website_url,
       created_at: stored.created_at,
     };
     return Response.json({ profile });

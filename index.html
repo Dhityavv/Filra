@@ -15,6 +15,7 @@
     <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 2.6l2.9 5.9 6.5.9-4.7 4.6 1.1 6.5-5.8-3-5.8 3 1.1-6.5L2.6 9.4l6.5-.9z"/></symbol>
     <symbol id="i-search" viewBox="0 0 24 24"><path d="M11 4a7 7 0 015.6 11.2l4.1 4.1-1.4 1.4-4.1-4.1A7 7 0 1111 4zm0 2a5 5 0 100 10 5 5 0 000-10z"/></symbol>
     <symbol id="i-bookmark" viewBox="0 0 24 24"><path d="M6 3h12a1 1 0 011 1v17l-7-4.2L5 21V4a1 1 0 011-1z"/></symbol>
+    <symbol id="i-heart" viewBox="0 0 24 24"><path d="M12 21s-8.5-5.3-8.5-11.2A4.8 4.8 0 0112 7.1a4.8 4.8 0 018.5 2.7C20.5 15.7 12 21 12 21z"/></symbol>
     <symbol id="i-close" viewBox="0 0 24 24"><path d="M6.4 5L5 6.4 10.6 12 5 17.6 6.4 19 12 13.4 17.6 19 19 17.6 13.4 12 19 6.4 17.6 5 12 10.6z"/></symbol>
     <symbol id="i-trash" viewBox="0 0 24 24"><path d="M9 3h6l1 2h4v2H4V5h4l1-2zM6 9h12l-1 12H7L6 9zm3 2v8h2v-8H9zm4 0v8h2v-8h-2z"/></symbol>
     <symbol id="i-edit" viewBox="0 0 24 24"><path d="M4 16.5V20h3.5L18.8 8.7l-3.5-3.5L4 16.5zM20.7 6.8a1 1 0 000-1.4l-2.1-2.1a1 1 0 00-1.4 0l-1.4 1.4 3.5 3.5 1.4-1.4z"/></symbol>
@@ -41,6 +42,7 @@
 
       <nav class="tabs" aria-label="Tampilan">
         <button class="tab is-active" type="button" data-view="explore" aria-pressed="true">Jelajahi</button>
+        <button class="tab" type="button" data-view="favorites" aria-pressed="false">Favorit <span class="tab__count" data-count="favorites">0</span></button>
         <button class="tab" type="button" data-view="watchlist" aria-pressed="false">Watchlist <span class="tab__count" data-count="watchlist">0</span></button>
         <button class="tab" type="button" data-view="ratings" aria-pressed="false">Rating <span class="tab__count" data-count="ratings">0</span></button>
         <a class="tab" href="/arcade">Minigames</a>
@@ -116,6 +118,23 @@
 
         <div class="load-more" id="loadMoreWrap" hidden>
           <button class="btn btn--ghost" id="loadMoreBtn" type="button">Muat lebih banyak</button>
+        </div>
+      </section>
+
+      <section class="view" id="favoritesView" hidden>
+        <header class="section-head">
+          <div>
+            <p class="eyebrow">Koleksi pribadi</p>
+            <h2 class="section-head__title">Film favorit</h2>
+          </div>
+        </header>
+        <p class="section-note">Film pilihanmu. Simpan film favorit dari kartu atau detail film.</p>
+        <div class="movie-grid" id="favoritesGrid"></div>
+        <div class="empty" id="favoritesEmpty" hidden>
+          <svg class="empty__icon" aria-hidden="true"><use href="#i-heart"></use></svg>
+          <h3>Belum ada film favorit</h3>
+          <p>Tekan ikon hati pada film untuk menyimpannya ke sini.</p>
+          <button class="btn btn--primary btn--sm" id="favoritesExploreBtn" type="button">Jelajahi film</button>
         </div>
       </section>
 

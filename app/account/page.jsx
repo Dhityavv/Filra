@@ -1,5 +1,5 @@
-import AccountPage from '../../components/account-page';
+import AccountDashboard from '../../components/account-dashboard';
 
 export default function Page() {
-  return <AccountPage />;
+  return <AccountDashboard />;
 }
