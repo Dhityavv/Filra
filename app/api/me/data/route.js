@@ -10,6 +10,17 @@ export async function GET() {
   try {
     await getOrCreateProfile(identity.userId);
     const db = getSupabaseAdmin();
+    const arcadeProfileInsert = await db
+      .from('arcade_profiles')
+      .upsert({ clerk_user_id: identity.userId }, { onConflict: 'clerk_user_id', ignoreDuplicates: true });
+    if (arcadeProfileInsert.error) throw arcadeProfileInsert.error;
+    const arcadeProfile = await db
+      .from('arcade_profiles')
+      .select('xp, level')
+      .eq('clerk_user_id', identity.userId)
+      .single();
+    if (arcadeProfile.error) throw arcadeProfile.error;
+
     const [ratings, favorites, watchlist] = await Promise.all([
       db.from('movie_ratings')
         .select('movie_id, movie, score, review, updated_at')
@@ -37,6 +48,7 @@ export async function GET() {
       favorites: favorites.data || [],
       favoritesAvailable,
       watchlist: watchlist.data,
+      arcade: arcadeProfile.data || { xp: 0, level: 1 },
     });
   } catch (error) {
     console.error('Failed to load account movie data:', error);

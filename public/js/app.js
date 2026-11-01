@@ -30,6 +30,7 @@
     loading: false,
     autoLoadPaused: false,
     requestId: 0,
+    requestedMovieId: 0,
   };
 
   const cache = new Map();
@@ -168,6 +169,14 @@
       renderWatchlist();
       renderRatings();
       Object.keys(ratings).forEach(updateCardRating);
+      if (state.requestedMovieId) {
+        const movieId = state.requestedMovieId;
+        state.requestedMovieId = 0;
+        const url = new URL(window.location.href);
+        url.searchParams.delete('movie');
+        window.history.replaceState(window.history.state, '', `${url.pathname}${url.search}${url.hash}`);
+        openDetail(movieId);
+      }
     });
 
     pendingIdentity = { userId, promise };
@@ -1099,6 +1108,11 @@
   }
 
   function boot() {
+    const requestedMovieId = Number(new URLSearchParams(window.location.search).get('movie'));
+    state.requestedMovieId = Number.isSafeInteger(requestedMovieId) && requestedMovieId > 0
+      ? requestedMovieId
+      : 0;
+
     Object.assign(el, {
       appView: $('#appView'),
       hero: $('#hero'),

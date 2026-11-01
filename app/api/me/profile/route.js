@@ -1,4 +1,4 @@
-import { getCurrentIdentity } from '../../../../lib/auth';
+import { getClerkUser, getCurrentIdentity } from '../../../../lib/auth';
 import { getOrCreateProfile } from '../../../../lib/profiles';
 import { readJsonObject } from '../../../../lib/request-body';
 import { getSupabaseAdmin } from '../../../../lib/supabase-admin';
@@ -9,10 +9,12 @@ export async function GET() {
 
   try {
     const stored = await getOrCreateProfile(identity.userId);
+    const clerkUser = await getClerkUser();
     const profile = {
       username: stored.username,
       display_name: stored.display_name,
       bio: stored.bio,
+      image_url: clerkUser?.imageUrl || '',
       created_at: stored.created_at,
     };
     return Response.json({ profile });

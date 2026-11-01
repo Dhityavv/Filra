@@ -22,26 +22,30 @@ function MovieCollection({ items, kind, title, eyebrow, emptyText, available = t
             const poster = posterUrl(movie);
             return (
               <article className="community-row profile-rating-card" key={item.movie_id}>
-                <div className="profile-rating-card__movie">
+                <Link
+                  aria-label={`Buka detail film ${movie?.title || 'Film'}`}
+                  className="profile-rating-card__link"
+                  href={`/?movie=${encodeURIComponent(item.movie_id)}`}
+                >
                   {poster ? (
                     <Image alt="" className="profile-rating-poster" height={112} src={poster} width={75} />
                   ) : (
                     <span aria-hidden="true" className="profile-rating-poster profile-rating-poster--empty">FILM</span>
                   )}
-                  <div>
-                    <h3>{movie?.title || 'Film'}</h3>
+                  <span className="profile-rating-card__copy">
+                    <strong>{movie?.title || 'Film'}</strong>
                     {kind === 'rating' ? (
                       <>
-                        <p className="community-muted">
+                        <span className="community-muted">
                           Diperbarui {new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium' }).format(new Date(item.updated_at))}
-                        </p>
-                        {item.review ? <p className="profile-rating-review">{item.review}</p> : null}
+                        </span>
+                        {item.review ? <span className="profile-rating-review">{item.review}</span> : null}
                       </>
                     ) : (
-                      <p className="community-muted">{kind === 'favorite' ? 'Film favorit' : 'Di watchlist'}</p>
+                      <span className="community-muted">{kind === 'favorite' ? 'Film favorit' : 'Di watchlist'}</span>
                     )}
-                  </div>
-                </div>
+                  </span>
+                </Link>
                 {kind === 'rating' ? (
                   <span className="profile-score"><strong>{item.score}</strong><small>/10</small></span>
                 ) : null}
@@ -59,56 +63,73 @@ function MovieCollection({ items, kind, title, eyebrow, emptyText, available = t
 }
 
 export default function ProfileDashboard({ data, isOwnProfile = false }) {
-  const { profile, ratings, favorites = [], favoritesAvailable = true, watchlist = [] } = data;
+  const { profile, ratings, favorites = [], favoritesAvailable = true, watchlist = [], arcade = { level: 1, xp: 0 } } = data;
   const displayName = profile.display_name || profile.username;
   const initials = displayName.trim().slice(0, 1).toLocaleUpperCase('id-ID') || '?';
 
   return (
-    <main className="community-page">
-      <header className="community-card profile-hero">
-        <div className="profile-hero__identity">
-          <span aria-hidden="true" className="community-avatar community-avatar--profile">{initials}</span>
-          <div>
-            <p className="eyebrow">{isOwnProfile ? 'Dashboard profil' : 'Profil publik'}</p>
-            <h1 className="section-head__title">{displayName}</h1>
-            <p className="community-muted">@{profile.username}</p>
+    <main className="community-page profile-dashboard">
+      <aside className="profile-sidebar">
+        <section className="community-card profile-identity-card">
+          <div
+            aria-label={`${displayName} profile picture`}
+            className="profile-identity-card__avatar"
+            role="img"
+            style={profile.image_url ? { backgroundImage: `url("${profile.image_url}")` } : undefined}
+          >
+            {!profile.image_url ? initials : null}
           </div>
-        </div>
-        {profile.bio ? <p className="profile-hero__bio">{profile.bio}</p> : <p className="community-muted profile-hero__bio">Belum ada bio.</p>}
-        <div className="profile-hero__footer">
-          <span className="profile-rating-count"><strong>{ratings.length}</strong> rating</span>
-          <span className="profile-rating-count"><strong>{favorites.length}</strong> favorit</span>
-          <span className="profile-rating-count"><strong>{watchlist.length}</strong> watchlist</span>
-          {isOwnProfile ? (
-            <Link className="btn btn--ghost btn--sm" href="/account/manage">Manage account</Link>
-          ) : (
-            <Link className="btn btn--ghost btn--sm" href="/community">Cari teman</Link>
-          )}
-        </div>
-      </header>
+          <p className="eyebrow">{isOwnProfile ? 'Dashboard profil' : 'Profil Filra'}</p>
+          <h1 className="section-head__title">{displayName}</h1>
+          <p className="community-muted profile-identity-card__username">@{profile.username}</p>
+          <p className="profile-identity-card__bio">{profile.bio || 'Belum ada bio.'}</p>
+          <div className="profile-level">
+            <span className="profile-level__icon" aria-hidden="true">✦</span>
+            <span>
+              <small>MINIGAMES LEVEL</small>
+              <strong>Level {arcade.level}</strong>
+            </span>
+            <span className="profile-level__xp">{Number(arcade.xp).toLocaleString('id-ID')} XP</span>
+          </div>
+          <div className="profile-identity-card__actions">
+            {isOwnProfile ? (
+              <Link className="btn btn--ghost btn--sm" href="/account/manage">Manage account</Link>
+            ) : (
+              <Link className="btn btn--ghost btn--sm" href="/community">Cari teman</Link>
+            )}
+          </div>
+        </section>
+      </aside>
 
-      <MovieCollection
-        emptyText={favoritesAvailable ? 'Belum ada film yang ditambahkan ke favorit.' : 'Koleksi favorit belum tersedia.'}
-        eyebrow="KOLEKSI PILIHAN"
-        items={favorites}
-        kind="favorite"
-        title="Film favorit"
-        available={favoritesAvailable}
-      />
-      <MovieCollection
-        emptyText="Belum ada rating publik."
-        eyebrow="SELERA FILM"
-        items={ratings}
-        kind="rating"
-        title="Rating film"
-      />
-      <MovieCollection
-        emptyText="Watchlist masih kosong."
-        eyebrow="NANTI DITONTON"
-        items={watchlist}
-        kind="watchlist"
-        title="Watchlist"
-      />
+      <div className="profile-content">
+        <header className="profile-content__heading">
+          <p className="eyebrow">RUANG FILM PRIBADI</p>
+          <h2>Koleksi film</h2>
+          <p className="community-muted">Rating, film favorit, dan watchlist {isOwnProfile ? 'kamu' : displayName}.</p>
+        </header>
+        <MovieCollection
+          emptyText={favoritesAvailable ? 'Belum ada film yang ditambahkan ke favorit.' : 'Koleksi favorit belum tersedia.'}
+          eyebrow="KOLEKSI PILIHAN"
+          items={favorites}
+          kind="favorite"
+          title="Film favorit"
+          available={favoritesAvailable}
+        />
+        <MovieCollection
+          emptyText="Belum ada rating publik."
+          eyebrow="SELERA FILM"
+          items={ratings}
+          kind="rating"
+          title="Rating film"
+        />
+        <MovieCollection
+          emptyText="Watchlist masih kosong."
+          eyebrow="NANTI DITONTON"
+          items={watchlist}
+          kind="watchlist"
+          title="Watchlist"
+        />
+      </div>
     </main>
   );
 }
