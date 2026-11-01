@@ -3,16 +3,16 @@ import ArcadeAccount from './arcade-account';
 import { ARCADE_GAMES } from '../../lib/arcade/definitions';
 
 const navigation = [
-  { href: '/arcade', label: 'Minigames home', code: 'M' },
-  { href: '/arcade/leaderboard', label: 'Leaderboard', code: 'L' },
-  { href: '/arcade/statistics', label: 'Your stats', code: 'S' },
+  { href: '/minigames', label: 'Minigames home', code: 'M' },
+  { href: '/minigames/leaderboard', label: 'Leaderboard', code: 'L' },
+  { href: '/minigames/statistics', label: 'Your stats', code: 'S' },
 ];
 
 export default function ArcadeShell({ children }) {
   return (
     <div className="arcade-app">
       <aside className="arcade-sidebar">
-        <Link className="arcade-brand" href="/arcade" aria-label="Filra Minigames home">
+        <Link className="arcade-brand" href="/" aria-label="Kembali ke halaman utama Filra">
           <span className="arcade-brand-mark">F</span>
           <span>FILRA <b>MINIGAMES</b></span>
         </Link>
@@ -40,7 +40,9 @@ export default function ArcadeShell({ children }) {
       <div className="arcade-stage">
         <header className="arcade-topbar">
           <div className="arcade-mobile-brand">
-            <span className="arcade-brand-mark">F</span> MINIGAMES
+            <Link href="/" className="arcade-mobile-brand-link" aria-label="Kembali ke halaman utama Filra">
+              <span className="arcade-brand-mark">F</span> FILRA
+            </Link>
           </div>
           <span className="arcade-topbar-caption">A CINEMATIC PLAYGROUND FOR MOVIE LOVERS</span>
           <ArcadeAccount />

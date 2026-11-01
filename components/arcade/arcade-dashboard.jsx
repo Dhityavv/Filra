@@ -72,6 +72,7 @@ export default function ArcadeDashboard({ overview, error }) {
           <a className="arcade-primary-button" href="#games">Explore games <span aria-hidden="true">↓</span></a>
         </div>
         <div className="arcade-hero-visual" aria-hidden="true">
+          <div className="arcade-hero-image" />
           <div className="arcade-hero-sun" />
           <div className="arcade-hero-ring arcade-hero-ring-one" />
           <div className="arcade-hero-ring arcade-hero-ring-two" />
@@ -84,7 +85,7 @@ export default function ArcadeDashboard({ overview, error }) {
       {error ? (
         <section className="arcade-alert" role="status">
           <strong>Progression belum siap.</strong>
-          <span>{error} Pastikan konfigurasi Supabase aktif dan migrasi <code>supabase/arcade.sql</code> sudah dijalankan.</span>
+          <span>{error} Pastikan konfigurasi Supabase aktif, <code>supabase/arcade.sql</code> sudah dijalankan, dan migrasi <code>supabase/migrations/20261101170000_add_arcade_question_rotation.sql</code> sudah diterapkan.</span>
         </section>
       ) : null}
 
@@ -133,7 +134,7 @@ export default function ArcadeDashboard({ overview, error }) {
         <div className="arcade-panel arcade-achievement-panel">
           <div className="arcade-section-heading compact">
             <div><span className="arcade-eyebrow">MILESTONES</span><h2>Your achievements</h2></div>
-            <Link href="/arcade/statistics">All stats →</Link>
+            <Link href="/minigames/statistics">All stats →</Link>
           </div>
           {!overview?.achievements?.length ? (
             <div className="arcade-empty-state">
@@ -157,7 +158,7 @@ export default function ArcadeDashboard({ overview, error }) {
 
       <section className="arcade-feature-banner">
         <div><span className="arcade-eyebrow">YOUR NAME IN LIGHTS</span><h2>Every legend starts<br />with one more round.</h2></div>
-        <Link href="/arcade/leaderboard" className="arcade-outline-button">View leaderboard <span aria-hidden="true">→</span></Link>
+        <Link href="/minigames/leaderboard" className="arcade-outline-button">View leaderboard <span aria-hidden="true">→</span></Link>
       </section>
     </div>
   );

@@ -3,7 +3,7 @@ import { getArcadeOverview } from '../../lib/arcade/engine';
 
 export const dynamic = 'force-dynamic';
 
-export default async function ArcadeHomePage() {
+export default async function MinigamesHomePage() {
   let overview = null;
   let error = '';
   try {

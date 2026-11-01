@@ -40,7 +40,7 @@ export default function ArcadeStatistics() {
         <div className="arcade-page-title"><span className="arcade-eyebrow">PLAYER DATA</span><h1>Your statistics</h1></div>
         <section className="arcade-guest-callout">
           <div><h2>Statistik permanen butuh akun.</h2><p>Kamu tetap bisa mencoba semua game sebagai tamu. Login agar riwayat, XP, streak, dan badge tersimpan.</p></div>
-          <Link className="arcade-primary-button" href="/arcade">Browse games</Link>
+          <Link className="arcade-primary-button" href="/minigames">Browse games</Link>
         </section>
       </div>
     );
@@ -88,7 +88,7 @@ export default function ArcadeStatistics() {
       <section className="arcade-table-panel arcade-stats-section">
         <div className="arcade-section-heading compact"><div><span className="arcade-eyebrow">SESSION LOG</span><h2>Recent games</h2></div></div>
         {!data.scores.length ? (
-          <div className="arcade-empty-state"><p>Belum ada riwayat game. <Link href="/arcade">Mulai bermain</Link>.</p></div>
+          <div className="arcade-empty-state"><p>Belum ada riwayat game. <Link href="/minigames">Mulai bermain</Link>.</p></div>
         ) : (
           <div className="arcade-history-list">
             {data.scores.map((score, index) => {

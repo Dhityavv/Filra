@@ -22,7 +22,7 @@ function MovieCollection({ items, kind, title, eyebrow, emptyText, available = t
             const poster = posterUrl(movie);
             return (
               <article className="community-row profile-rating-card" key={item.movie_id}>
-                <Link
+                <a
                   aria-label={`Buka detail film ${movie?.title || 'Film'}`}
                   className="profile-rating-card__link"
                   href={`/?movie=${encodeURIComponent(item.movie_id)}`}
@@ -45,7 +45,7 @@ function MovieCollection({ items, kind, title, eyebrow, emptyText, available = t
                       <span className="community-muted">{kind === 'favorite' ? 'Film favorit' : 'Di watchlist'}</span>
                     )}
                   </span>
-                </Link>
+                </a>
                 {kind === 'rating' ? (
                   <span className="profile-score"><strong>{item.score}</strong><small>/10</small></span>
                 ) : null}

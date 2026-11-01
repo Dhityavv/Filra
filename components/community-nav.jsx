@@ -8,7 +8,7 @@ export default function CommunityNav() {
         <span className="brand__name">Filra<span>Film Rating</span></span>
       </Link>
       <nav aria-label="Navigasi akun">
-        <Link href="/arcade">Minigames</Link>
+        <Link href="/minigames">Minigames</Link>
         <Link href="/community">Teman</Link>
         <Link href="/account">Profil saya</Link>
       </nav>

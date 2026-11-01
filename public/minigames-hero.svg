@@ -1,0 +1,63 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 960 720" fill="none">
+  <defs>
+    <linearGradient id="frame" x1="120" y1="110" x2="810" y2="630" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#D2B9FF"/>
+      <stop offset=".48" stop-color="#9165E8"/>
+      <stop offset="1" stop-color="#37235C"/>
+    </linearGradient>
+    <linearGradient id="posterA" x1="170" y1="205" x2="360" y2="500" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F7B68B"/>
+      <stop offset=".5" stop-color="#A4559A"/>
+      <stop offset="1" stop-color="#302650"/>
+    </linearGradient>
+    <linearGradient id="posterB" x1="440" y1="120" x2="630" y2="455" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#8BE6E1"/>
+      <stop offset=".48" stop-color="#5663A8"/>
+      <stop offset="1" stop-color="#201D3A"/>
+    </linearGradient>
+    <linearGradient id="posterC" x1="650" y1="235" x2="830" y2="530" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#F3D48F"/>
+      <stop offset=".52" stop-color="#CF806E"/>
+      <stop offset="1" stop-color="#35213D"/>
+    </linearGradient>
+    <radialGradient id="lens" cx="0" cy="0" r="1" gradientTransform="matrix(0 212 -212 0 504 344)" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#E6D8FF" stop-opacity=".72"/>
+      <stop offset=".28" stop-color="#9E73EF" stop-opacity=".32"/>
+      <stop offset="1" stop-color="#6A43A8" stop-opacity=".02"/>
+    </radialGradient>
+    <filter id="glow" x="85" y="46" width="790" height="630" color-interpolation-filters="sRGB" filterUnits="userSpaceOnUse">
+      <feGaussianBlur stdDeviation="30"/>
+    </filter>
+  </defs>
+  <ellipse cx="506" cy="375" fill="#9A65EA" fill-opacity=".26" filter="url(#glow)" rx="325" ry="235"/>
+  <path d="M92 552C228 632 382 659 546 623c142-31 255-117 326-248" stroke="url(#frame)" stroke-opacity=".46" stroke-width="2"/>
+  <path d="M91 575C251 671 424 681 590 637c131-35 235-113 302-220" stroke="#C9B1FF" stroke-opacity=".2" stroke-width="1.5"/>
+  <g transform="rotate(-13 267 351)">
+    <rect x="162" y="183" width="207" height="310" rx="18" fill="#181321" stroke="#D7C5FF" stroke-opacity=".5" stroke-width="2"/>
+    <rect x="176" y="197" width="179" height="282" rx="11" fill="url(#posterA)"/>
+    <circle cx="266" cy="291" r="42" fill="#FAD2A1" fill-opacity=".7"/>
+    <path d="m177 433 73-98 45 45 60-77v176H177v-46Z" fill="#34223F" fill-opacity=".82"/>
+    <path d="M196 455h104" stroke="#F5E9FF" stroke-linecap="round" stroke-opacity=".75" stroke-width="5"/>
+    <path d="M200 468h69" stroke="#F5E9FF" stroke-linecap="round" stroke-opacity=".4" stroke-width="3"/>
+  </g>
+  <g transform="rotate(5 514 319)">
+    <rect x="404" y="105" width="220" height="348" rx="20" fill="#17131F" stroke="#E1D2FF" stroke-opacity=".74" stroke-width="2"/>
+    <rect x="419" y="120" width="190" height="318" rx="12" fill="url(#posterB)"/>
+    <circle cx="515" cy="255" r="64" fill="url(#lens)"/>
+    <path d="M420 375c45-57 83-80 117-60 24 15 42 13 73-30v153H420v-63Z" fill="#252342" fill-opacity=".78"/>
+    <path d="M445 408h137" stroke="#F3ECFF" stroke-linecap="round" stroke-opacity=".82" stroke-width="6"/>
+    <path d="M445 423h87" stroke="#F3ECFF" stroke-linecap="round" stroke-opacity=".45" stroke-width="3"/>
+  </g>
+  <g transform="rotate(14 742 386)">
+    <rect x="644" y="219" width="191" height="297" rx="18" fill="#181321" stroke="#D7C5FF" stroke-opacity=".48" stroke-width="2"/>
+    <rect x="658" y="233" width="163" height="269" rx="11" fill="url(#posterC)"/>
+    <path d="M658 412c37-46 60-54 81-38 27 20 48-5 82-49v177H658v-90Z" fill="#3C294B" fill-opacity=".8"/>
+    <circle cx="739" cy="315" r="35" fill="#FFE5B5" fill-opacity=".72"/>
+    <path d="M681 472h116" stroke="#FFF0DB" stroke-linecap="round" stroke-opacity=".75" stroke-width="5"/>
+  </g>
+  <circle cx="515" cy="350" r="206" stroke="#D7C4FF" stroke-opacity=".14" stroke-width="1.5"/>
+  <ellipse cx="515" cy="350" stroke="#C7A9FF" stroke-opacity=".36" stroke-width="2" rx="300" ry="76" transform="rotate(-22 515 350)"/>
+  <ellipse cx="515" cy="350" stroke="#82E3EF" stroke-opacity=".25" stroke-width="2" rx="274" ry="65" transform="rotate(26 515 350)"/>
+  <circle cx="766" cy="238" r="5" fill="#D7C3FF"/>
+  <circle cx="278" cy="574" r="4" fill="#8CE8E8"/>
+</svg>

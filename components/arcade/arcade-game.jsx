@@ -4,6 +4,8 @@ import Image from 'next/image';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { ARCADE_GAMES, GAME_MODES } from '../../lib/arcade/definitions';
 
+const ROTATION_STORAGE_KEY = 'filra-minigames-rotation-id';
+
 async function postGame(payload) {
   const response = await fetch('/api/arcade/game', {
     method: 'POST',
@@ -13,6 +15,14 @@ async function postGame(payload) {
   const data = await response.json();
   if (!response.ok) throw new Error(data.error || 'Game tidak dapat diproses.');
   return data;
+}
+
+function getRotationId() {
+  const storedId = window.localStorage.getItem(ROTATION_STORAGE_KEY);
+  if (storedId && /^[0-9a-f-]{36}$/i.test(storedId)) return storedId;
+  const rotationId = window.crypto.randomUUID();
+  window.localStorage.setItem(ROTATION_STORAGE_KEY, rotationId);
+  return rotationId;
 }
 
 function Feedback({ toast }) {
@@ -71,7 +81,7 @@ function ResultPanel({ result, game, onAgain, mode }) {
       ) : null}
       <div className="arcade-result-actions">
         <button className="arcade-primary-button" onClick={onAgain} type="button">{mode === 'daily' ? 'Try another mode' : 'Play again'}</button>
-        <a className="arcade-outline-button" href="/arcade">Back to minigames</a>
+        <a className="arcade-outline-button" href="/minigames">Back to minigames</a>
       </div>
       <span className="arcade-result-game">{game.title} / {GAME_MODES[game.key][mode].label}</span>
     </section>
@@ -135,7 +145,12 @@ export default function ArcadeGame({ gameKey, initialMode = '' }) {
     setAnswer('');
     timerSubmitted.current = false;
     try {
-      const data = await postGame({ action: 'start', game: gameKey, mode });
+      const data = await postGame({
+        action: 'start',
+        game: gameKey,
+        mode,
+        rotationId: getRotationId(),
+      });
       setSession({ id: data.sessionId, mode: data.mode, question: data.question, guest: data.guest });
       startedAt.current = Date.now();
       setRemaining(60);
@@ -215,7 +230,7 @@ export default function ArcadeGame({ gameKey, initialMode = '' }) {
   return (
     <div className="arcade-game-page">
       <div className="arcade-game-heading">
-        <a href="/arcade" className="arcade-back-link">← Minigames</a>
+        <a href="/minigames" className="arcade-back-link">← Minigames</a>
         <span className="arcade-eyebrow">{game.category} / GAME {game.icon}</span>
         <h1>{game.title}</h1>
         <p>{game.description}</p>

@@ -171,6 +171,12 @@
   letter-spacing: .15em;
 }
 
+.arcade-mobile-brand-link {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
 .arcade-mobile-brand .arcade-brand-mark {
   width: 28px;
   height: 28px;
@@ -333,6 +339,13 @@
     linear-gradient(90deg, #14111d 0%, transparent 28%),
     radial-gradient(ellipse at 64% 57%, rgba(82, 50, 142, .6), transparent 28%),
     linear-gradient(145deg, rgba(28, 19, 42, .3), rgba(11, 12, 21, .5));
+}
+
+.arcade-hero-image {
+  position: absolute;
+  inset: 0;
+  background: url("/minigames-hero.svg") center / cover no-repeat;
+  opacity: .8;
 }
 
 .arcade-hero-visual::before,

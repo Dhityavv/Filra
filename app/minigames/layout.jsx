@@ -6,6 +6,6 @@ export const metadata = {
   description: 'Mainkan mini game film, raih XP, dan bersaing di Filra Minigames.',
 };
 
-export default function ArcadeLayout({ children }) {
+export default function MinigamesLayout({ children }) {
   return <ArcadeShell>{children}</ArcadeShell>;
 }

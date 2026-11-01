@@ -8,7 +8,7 @@ export default function ArcadeAuth() {
   if (!isLoaded) return <span className="arcade-account-note">Memuat akun...</span>;
   if (!userId) {
     return (
-      <SignInButton mode="modal" fallbackRedirectUrl="/arcade">
+      <SignInButton mode="modal" fallbackRedirectUrl="/minigames">
         <button className="arcade-signin" type="button">Masuk untuk menyimpan XP</button>
       </SignInButton>
     );
