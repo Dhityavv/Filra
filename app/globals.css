@@ -104,6 +104,8 @@
 }
 
 .community-avatar {
+  position: relative;
+  overflow: hidden;
   display: grid;
   width: 44px;
   height: 44px;
@@ -116,6 +118,20 @@
   color: var(--gold);
   font-size: 18px;
   font-weight: 800;
+}
+
+.community-avatar__image {
+  position: absolute;
+  z-index: 1;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  border-radius: inherit;
+  object-fit: cover;
+}
+
+.community-avatar__initials {
+  position: relative;
 }
 
 .community-person-copy {

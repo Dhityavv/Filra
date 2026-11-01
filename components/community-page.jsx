@@ -1,5 +1,6 @@
 'use client';
 
+import Image from 'next/image';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 import CommunityNav from './community-nav';
@@ -11,14 +12,34 @@ async function requestJson(url, options) {
   return body;
 }
 
+function CommunityAvatar({ displayName, imageUrl }) {
+  const [imageFailed, setImageFailed] = useState(false);
+  const initials = displayName.trim().slice(0, 1).toLocaleUpperCase('id-ID') || '?';
+
+  return (
+    <span aria-hidden="true" className="community-avatar">
+      {imageUrl && !imageFailed ? (
+        <Image
+          alt=""
+          className="community-avatar__image"
+          fill
+          onError={() => setImageFailed(true)}
+          unoptimized
+          src={imageUrl}
+        />
+      ) : null}
+      <span className="community-avatar__initials">{initials}</span>
+    </span>
+  );
+}
+
 function PersonRow({ user, actions, featured = false }) {
   if (!user) return null;
   const displayName = user.display_name || user.username;
-  const initials = displayName.trim().slice(0, 1).toLocaleUpperCase('id-ID') || '?';
   return (
     <div className={`community-row${featured ? ' community-friend-card' : ''}`}>
       <Link className="community-person-link" href={`/u/${user.username}`}>
-        <span aria-hidden="true" className="community-avatar">{initials}</span>
+        <CommunityAvatar displayName={displayName} imageUrl={user.image_url} />
         <span className="community-person-copy">
           <span className="community-row__name">{displayName}</span>
           <span className="community-muted">@{user.username}</span>

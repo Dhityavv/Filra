@@ -88,6 +88,15 @@ export default function ClerkControls() {
                 <Link className="account-menu__item" href="/account/manage" onClick={() => setMenuOpen(false)}>
                   Manage account
                 </Link>
+                <a
+                  className="account-menu__item"
+                  href="https://github.com/Dhityavv/Filra/issues/new"
+                  onClick={() => setMenuOpen(false)}
+                  rel="noopener noreferrer"
+                  target="_blank"
+                >
+                  Hubungi / beri masukan
+                </a>
                 <button
                   className="account-menu__item"
                   onClick={async () => {

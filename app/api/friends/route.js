@@ -1,14 +1,15 @@
-import { getCurrentIdentity } from '../../../lib/auth';
+import { getClerkUserImageUrl, getCurrentIdentity } from '../../../lib/auth';
 import { getOrCreateProfile } from '../../../lib/profiles';
 import { readJsonObject } from '../../../lib/request-body';
 import { getSupabaseAdmin } from '../../../lib/supabase-admin';
 
-function publicProfile(profile) {
+function publicProfile(profile, imageUrl) {
   if (!profile) return null;
   return {
     username: profile.username,
     display_name: profile.display_name,
     bio: profile.bio,
+    image_url: imageUrl,
   };
 }
 
@@ -53,10 +54,16 @@ export async function GET() {
     if (profiles.error) throw profiles.error;
 
     const byId = new Map(profiles.data.map((profile) => [profile.clerk_user_id, profile]));
+    const imageUrls = await Promise.all([...profileIds].map(async (userId) => [
+      userId,
+      await getClerkUserImageUrl(userId),
+    ]));
+    const imageUrlById = new Map(imageUrls);
+    const mapUser = (userId) => publicProfile(byId.get(userId), imageUrlById.get(userId) || '');
     const mapItems = (items, idField) => items.map((item) => ({
       id: item.id,
       createdAt: item.created_at,
-      user: publicProfile(byId.get(item[idField])),
+      user: mapUser(item[idField]),
     }));
 
     return Response.json({
@@ -65,9 +72,7 @@ export async function GET() {
       friends: accepted.data.map((item) => ({
         id: item.id,
         createdAt: item.created_at,
-        user: publicProfile(byId.get(
-          item.requester_id === identity.userId ? item.recipient_id : item.requester_id,
-        )),
+        user: mapUser(item.requester_id === identity.userId ? item.recipient_id : item.requester_id),
       })),
     });
   } catch (error) {
