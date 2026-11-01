@@ -5,7 +5,7 @@ Filra is a responsive movie discovery and rating app built with Next.js, TMDB, C
 ## Features
 
 - Search, genre/year filters, sorting, and automatic movie pagination
-- Movie details, Indonesian synopsis fallback, ratings, and short reviews
+- Movie details, Indonesian synopsis fallback, official Indonesian streaming/rent/buy availability, ratings, and short reviews
 - Clerk sign-in with Google and email/password
 - Custom public profile: username, display name, bio, and website link
 - Search for users, send/accept friend requests, and view public profiles
@@ -78,3 +78,4 @@ Set the same environment variables in the Vercel project before deploying. Do no
 ## Data attribution
 
 Movie data and images are provided by [TMDB](https://www.themoviedb.org/). Filra is not endorsed or certified by TMDB.
+Movie availability information is provided by [JustWatch](https://www.justwatch.com/id) through TMDB.

@@ -23,7 +23,9 @@ const ALLOWED_SORTS = new Set([
 ]);
 
 function isAllowedEndpoint(endpoint) {
-  return ALLOWED_ENDPOINTS.has(endpoint) || /^\/movie\/[1-9]\d*$/.test(endpoint);
+  return ALLOWED_ENDPOINTS.has(endpoint)
+    || /^\/movie\/[1-9]\d*$/.test(endpoint)
+    || /^\/movie\/[1-9]\d*\/watch\/providers$/.test(endpoint);
 }
 
 function validateParams(query) {
@@ -85,7 +87,9 @@ export async function GET(request) {
 
   const url = new URL(`${TMDB_API_BASE}${endpoint}`);
   url.searchParams.set('api_key', apiKey);
-  url.searchParams.set('language', 'id-ID');
+  if (!endpoint.endsWith('/watch/providers')) {
+    url.searchParams.set('language', 'id-ID');
+  }
   for (const [name, value] of Object.entries(query)) {
     if (name !== 'endpoint' && name !== 'language') url.searchParams.set(name, value);
   }

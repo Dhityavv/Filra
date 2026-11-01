@@ -34,6 +34,7 @@
   };
 
   const cache = new Map();
+  const watchProvidersCache = new Map();
   const el = {};
   let heroMovie = null;
   let ratings = readJSON(KEYS.ratings, {});
@@ -788,11 +789,110 @@
       const movie = await api(`/movie/${id}`);
       if (requestId !== modalRequest) return;
       cache.set(id, movie);
+      const providerState = watchProvidersCache.get(id);
+      if (!providerState) watchProvidersCache.set(id, { status: 'loading' });
       renderDetail(movie);
+      if (!providerState) loadWatchProviders(movie, requestId);
     } catch (error) {
       if (requestId !== modalRequest) return;
       renderModalError(error.message, () => openDetail(id));
     }
+  }
+
+  async function loadWatchProviders(movie, requestId) {
+    try {
+      const data = await api(`/movie/${movie.id}/watch/providers`);
+      if (requestId !== modalRequest) return;
+      watchProvidersCache.set(movie.id, {
+        status: 'loaded',
+        providers: data.results?.ID || null,
+      });
+      renderDetail(movie);
+    } catch (error) {
+      if (requestId !== modalRequest) return;
+      watchProvidersCache.set(movie.id, { status: 'error', message: error.message });
+      renderDetail(movie);
+    }
+  }
+
+  function watchProvidersMarkup(movie) {
+    const state = watchProvidersCache.get(movie.id);
+    if (!state || state.status === 'loading') {
+      return `<section class="watch-options" aria-busy="true">
+        <h3>Tempat menonton di Indonesia</h3>
+        <p class="watch-options__message">Memeriksa layanan streaming, sewa, dan beli...</p>
+      </section>`;
+    }
+    if (state.status === 'error') {
+      return `<section class="watch-options">
+        <h3>Tempat menonton di Indonesia</h3>
+        <p class="watch-options__message">${esc(state.message || 'Pilihan tempat menonton gagal dimuat.')}</p>
+        <button class="btn btn--ghost btn--sm" id="watchProvidersRetry" type="button">Coba lagi</button>
+      </section>`;
+    }
+
+    const region = state.providers;
+    if (!region) {
+      return `<section class="watch-options">
+        <h3>Tempat menonton di Indonesia</h3>
+        <p class="watch-options__message">Belum ada layanan resmi yang tercatat untuk film ini di Indonesia.</p>
+        <p class="watch-options__attribution">Data ketersediaan oleh <a href="https://www.justwatch.com/id" target="_blank" rel="noopener noreferrer">JustWatch</a> melalui TMDB.</p>
+      </section>`;
+    }
+
+    const categories = [
+      ['flatrate', 'Streaming'],
+      ['free', 'Gratis'],
+      ['ads', 'Gratis dengan iklan'],
+      ['rent', 'Sewa'],
+      ['buy', 'Beli'],
+    ];
+    const availableCategories = categories.filter(([key]) => Array.isArray(region[key]) && region[key].length);
+    const providersMarkup = availableCategories.map(([key, label]) => {
+      const providers = [...region[key]]
+        .sort((left, right) => left.display_priority - right.display_priority)
+        .map((provider) => `<span class="watch-provider">
+          ${provider.logo_path
+            ? `<img src="${esc(img(provider.logo_path, 'w92'))}" alt="" loading="lazy">`
+            : ''}
+          <span>${esc(provider.provider_name)}</span>
+        </span>`).join('');
+      return `<div class="watch-options__category">
+        <h4>${label}</h4>
+        <div class="watch-options__providers">${providers}</div>
+      </div>`;
+    }).join('');
+    let officialLink = '';
+    try {
+      const url = new URL(region.link);
+      if (url.protocol === 'https:' && url.hostname === 'www.themoviedb.org') {
+        officialLink = `<a class="btn btn--primary btn--sm" href="${esc(url.href)}" target="_blank" rel="noopener noreferrer">
+          Lihat link menonton resmi
+        </a>`;
+      }
+    } catch {
+      officialLink = '';
+    }
+
+    if (!availableCategories.length) {
+      return `<section class="watch-options">
+        <h3>Tempat menonton di Indonesia</h3>
+        <p class="watch-options__message">Belum ada layanan resmi yang tercatat untuk film ini di Indonesia.</p>
+        <p class="watch-options__attribution">Data ketersediaan oleh <a href="https://www.justwatch.com/id" target="_blank" rel="noopener noreferrer">JustWatch</a> melalui TMDB.</p>
+      </section>`;
+    }
+
+    return `<section class="watch-options">
+      <div class="watch-options__heading">
+        <div>
+          <h3>Tempat menonton di Indonesia</h3>
+          <p>Periksa ketersediaan streaming, sewa, atau beli.</p>
+        </div>
+        ${officialLink}
+      </div>
+      <div class="watch-options__categories">${providersMarkup}</div>
+      <p class="watch-options__attribution">Data ketersediaan oleh <a href="https://www.justwatch.com/id" target="_blank" rel="noopener noreferrer">JustWatch</a> melalui TMDB.</p>
+    </section>`;
   }
 
   function renderModalError(message, retry) {
@@ -836,6 +936,7 @@
             <button class="btn btn--ghost ${saved ? 'is-saved' : ''}" id="detailSave" type="button" aria-pressed="${saved}">${saved ? `${icon('check')} Tersimpan di watchlist` : `${icon('bookmark')} Tambah ke watchlist`}</button>
             <button class="btn btn--ghost ${favorite ? 'is-saved' : ''}" id="detailFavorite" data-favorite="${movie.id}" type="button" aria-pressed="${favorite}">${favorite ? `${icon('heart')} Hapus dari favorit` : `${icon('heart')} Tambah ke favorit`}</button>
           </div>
+          ${watchProvidersMarkup(movie)}
         </div>
 
         <form class="rate-box" id="rateForm">
@@ -935,6 +1036,14 @@
 
     $('#detailSave', el.modalBody).addEventListener('click', () => toggleWatchlist(movie));
     $('#detailFavorite', el.modalBody).addEventListener('click', () => toggleFavorite(movie));
+    const retryProviders = $('#watchProvidersRetry', el.modalBody);
+    if (retryProviders) {
+      retryProviders.addEventListener('click', () => {
+        watchProvidersCache.set(movie.id, { status: 'loading' });
+        renderDetail(movie);
+        loadWatchProviders(movie, modalRequest);
+      });
+    }
   }
 
   // ------------------------------------------------------------------ boot
