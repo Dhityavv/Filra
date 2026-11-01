@@ -37,6 +37,11 @@
   const watchProvidersCache = new Map();
   const el = {};
   let heroMovie = null;
+  let heroMovies = [];
+  let heroIndex = 0;
+  let heroRotationTimer = 0;
+  let heroTransitionTimer = 0;
+  let heroRotationPaused = false;
   let ratings = readJSON(KEYS.ratings, {});
   let favorites = readJSON(KEYS.favorites, {});
   let watchlist = readJSON(KEYS.watchlist, {});
@@ -384,7 +389,9 @@
     try {
       const data = await api('/trending/movie/day');
       const results = Array.isArray(data.results) ? data.results : [];
-      let movie = results.find((item) => item.backdrop_path) || results[0];
+      heroMovies = results.filter((item) => item.backdrop_path).slice(0, 10);
+      if (!heroMovies.length && results[0]) heroMovies = [results[0]];
+      let movie = heroMovies[0];
       if (!movie) return;
 
       if ((movie.overview || '').trim().length < 120) {
@@ -395,12 +402,54 @@
         }
       }
 
+      heroMovies[0] = movie;
+      heroMovies.forEach((item) => {
+        cache.set(item.id, item);
+        if (item.backdrop_path) {
+          const image = new window.Image();
+          image.src = img(item.backdrop_path, 'w1280');
+        }
+      });
+      heroIndex = 0;
       heroMovie = movie;
-      cache.set(movie.id, movie);
       renderHero(movie);
+      updateHeroRotationControl();
     } catch {
       el.hero.hidden = true;
     }
+  }
+
+  function updateHeroRotation() {
+    window.clearInterval(heroRotationTimer);
+    heroRotationTimer = 0;
+    if (
+      heroMovies.length < 2
+      || heroRotationPaused
+      || el.hero.hidden
+      || document.hidden
+    ) return;
+    heroRotationTimer = window.setInterval(showNextHero, 6000);
+  }
+
+  function updateHeroRotationControl() {
+    const available = heroMovies.length > 1;
+    el.heroRotation.hidden = !available;
+    el.heroRotation.setAttribute('aria-pressed', String(heroRotationPaused));
+    el.heroRotation.textContent = heroRotationPaused ? 'Lanjutkan banner' : 'Jeda banner';
+    updateHeroRotation();
+  }
+
+  function showNextHero() {
+    if (heroMovies.length < 2) return;
+    const nextIndex = (heroIndex + 1) % heroMovies.length;
+    window.clearTimeout(heroTransitionTimer);
+    el.hero.classList.add('hero--transitioning');
+    heroTransitionTimer = window.setTimeout(() => {
+      heroIndex = nextIndex;
+      heroMovie = heroMovies[heroIndex];
+      renderHero(heroMovie);
+      requestAnimationFrame(() => el.hero.classList.remove('hero--transitioning'));
+    }, 280);
   }
 
   async function loadMovies({ append = false } = {}) {
@@ -554,6 +603,7 @@
 
   function updateHeroVisibility() {
     el.hero.hidden = !heroMovie || state.view !== 'explore' || Boolean(state.query);
+    updateHeroRotation();
   }
 
   function updateHeroSave() {
@@ -1169,7 +1219,12 @@
     el.heroSave.addEventListener('click', () => {
       if (heroMovie) toggleWatchlist(heroMovie);
     });
+    el.heroRotation.addEventListener('click', () => {
+      heroRotationPaused = !heroRotationPaused;
+      updateHeroRotationControl();
+    });
     el.heroImg.addEventListener('error', () => el.hero.classList.add('hero--no-image'));
+    document.addEventListener('visibilitychange', updateHeroRotation);
 
     el.grid.addEventListener('click', handleGridClick);
     el.favoritesGrid.addEventListener('click', handleGridClick);
@@ -1231,6 +1286,7 @@
       heroOverview: $('#heroOverview'),
       heroDetail: $('#heroDetail'),
       heroSave: $('#heroSave'),
+      heroRotation: $('#heroRotation'),
       exploreView: $('#exploreView'),
       favoritesView: $('#favoritesView'),
       favoritesGrid: $('#favoritesGrid'),

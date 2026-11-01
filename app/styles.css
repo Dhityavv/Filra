@@ -418,6 +418,17 @@ img {
   inset: 0;
 }
 
+.hero__media,
+.hero__content {
+  transition: opacity 0.42s var(--ease), transform 0.42s var(--ease);
+}
+
+.hero--transitioning .hero__media,
+.hero--transitioning .hero__content {
+  opacity: 0;
+  transform: translateY(8px);
+}
+
 .hero__media::after {
   content: "";
   background:
@@ -487,7 +498,15 @@ img {
 .hero__actions {
   display: flex;
   flex-wrap: wrap;
+  align-items: center;
   gap: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .hero__media,
+  .hero__content {
+    transition: none;
+  }
 }
 
 /* ----------------------------------------------------------------- buttons */
